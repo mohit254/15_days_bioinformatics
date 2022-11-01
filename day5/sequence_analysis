@@ -1,0 +1,1227 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "id": "77c92f39",
+   "metadata": {},
+   "source": [
+    "# Comparing Nucleotide Sequences of Hendra Virus and Nipah Virus"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "a9f6b94e",
+   "metadata": {},
+   "source": [
+    "### Hendra Virus:"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "3fd3f665",
+   "metadata": {},
+   "source": [
+    "Hendra virus, scientific name Hendra henipavirus, is a bat-borne virus that is associated with a highly fatal infection in horses and humans. Numerous disease outbreaks in Australia among horses have been caused by Hendra virus."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "b4980d8d",
+   "metadata": {},
+   "source": [
+    "Fever, cough, sore throat, headache and tiredness are common initial symptoms. Meningitis or encephalitis (inflammation of the brain) can develop, causing headache, high fever, and drowsiness, and sometimes convulsions and coma. Hendra virus infection can be fatal."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "c2d471fa",
+   "metadata": {},
+   "source": [
+    "https://en.wikipedia.org/wiki/Hendra_virus\n",
+    "\n",
+    "https://www.health.nsw.gov.au/Infectious/factsheets/Pages/hendra_virus.aspx"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "9120df1f",
+   "metadata": {},
+   "source": [
+    "###  Nipah Virus:"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "5cad085c",
+   "metadata": {},
+   "source": [
+    "Nipah virus, scientific name Nipah henipavirus, is a bat-borne virus that causes Nipah virus infection in humans and other animals, a disease with a high mortality rate.Outbreaks occur almost annually in parts of Asia, primarily Bangladesh and India.\n",
+    "\n",
+    "Symptoms may initially include one or several of the following:\n",
+    "Fever,Headache,Cough,Sore throat,Difficulty breathing,Vomiting,etc"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "814e18cb",
+   "metadata": {},
+   "source": [
+    "## Objective for today:"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "e7315149",
+   "metadata": {},
+   "source": [
+    "Compare their nucleotide sequence and Protein (Amino Acid) sequence\n",
+    "\n",
+    "    - GC Content\n",
+    "\n",
+    "    - Freq of Each Amino Acids\n",
+    "\n",
+    "    - Find similarity between them\n",
+    "\n",
+    "        - Alignment\n",
+    "        - Hamming distance"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "a6bd27a2",
+   "metadata": {},
+   "source": [
+    "### Data Source:"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "f36113fb",
+   "metadata": {},
+   "source": [
+    "hendra : https://www.ncbi.nlm.nih.gov/nuccore/AF017149.3?report=fasta\n",
+    "\n",
+    "nipah : https://www.ncbi.nlm.nih.gov/nuccore/AF212302.2?report=fasta"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "d38908b7",
+   "metadata": {},
+   "source": [
+    "### Loading packages"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "id": "de59f011",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from Bio.Seq import Seq\n",
+    "from Bio import SeqIO"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 113,
+   "id": "7cf58074",
+   "metadata": {
+    "collapsed": true
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Help on function read in module Bio.SeqIO:\n",
+      "\n",
+      "read(handle, format, alphabet=None)\n",
+      "    Turn a sequence file into a single SeqRecord.\n",
+      "    \n",
+      "    Arguments:\n",
+      "     - handle   - handle to the file, or the filename as a string\n",
+      "       (note older versions of Biopython only took a handle).\n",
+      "     - format   - string describing the file format.\n",
+      "     - alphabet - no longer used, should be None.\n",
+      "    \n",
+      "    This function is for use parsing sequence files containing\n",
+      "    exactly one record.  For example, reading a GenBank file:\n",
+      "    \n",
+      "    >>> from Bio import SeqIO\n",
+      "    >>> record = SeqIO.read(\"GenBank/arab1.gb\", \"genbank\")\n",
+      "    >>> print(\"ID %s\" % record.id)\n",
+      "    ID AC007323.5\n",
+      "    >>> print(\"Sequence length %i\" % len(record))\n",
+      "    Sequence length 86436\n",
+      "    \n",
+      "    If the handle contains no records, or more than one record,\n",
+      "    an exception is raised.  For example:\n",
+      "    \n",
+      "    >>> from Bio import SeqIO\n",
+      "    >>> record = SeqIO.read(\"GenBank/cor6_6.gb\", \"genbank\")\n",
+      "    Traceback (most recent call last):\n",
+      "        ...\n",
+      "    ValueError: More than one record found in handle\n",
+      "    \n",
+      "    If however you want the first record from a file containing\n",
+      "    multiple records this function would raise an exception (as\n",
+      "    shown in the example above).  Instead use:\n",
+      "    \n",
+      "    >>> from Bio import SeqIO\n",
+      "    >>> record = next(SeqIO.parse(\"GenBank/cor6_6.gb\", \"genbank\"))\n",
+      "    >>> print(\"First record's ID %s\" % record.id)\n",
+      "    First record's ID X55053.1\n",
+      "    \n",
+      "    Use the Bio.SeqIO.parse(handle, format) function if you want\n",
+      "    to read multiple records from the handle.\n",
+      "\n"
+     ]
+    }
+   ],
+   "source": [
+    "# For documentation:\n",
+    "help(SeqIO.read)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 114,
+   "id": "6740c32c",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Loading Sequences\n",
+    "hendra = SeqIO.read(\"hendra.fasta\",\"fasta\")\n",
+    "nipah = SeqIO.read(\"nipah.fasta\",\"fasta\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 23,
+   "id": "abc6dc84",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "SeqRecord(seq=Seq('ACCGAACAAGGGGAAATATGGATACGTGTTAAAAAACTGCGTATGTTTAAAACT...GGT'), id='AF017149.3', name='AF017149.3', description='AF017149.3 Hendra virus, complete genome', dbxrefs=[])"
+      ]
+     },
+     "execution_count": 23,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "hendra"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 24,
+   "id": "66cc8ed5",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "SeqRecord(seq=Seq('ACCAAACAAGGGAGAATATGGATACGTTAAAATATATAACGTATTTTTAAAACT...GGT'), id='AF212302.2', name='AF212302.2', description='AF212302.2 Nipah virus, complete genome', dbxrefs=[])"
+      ]
+     },
+     "execution_count": 24,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "nipah"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 25,
+   "id": "1e200133",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "hendra_seq  = hendra.seq\n",
+    "nipah_seq = nipah.seq"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 26,
+   "id": "659771c4",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "hendra_seq_length :  18234\n",
+      "nipah_seq_length :  18246\n"
+     ]
+    }
+   ],
+   "source": [
+    "print(\"hendra_seq_length : \", len(hendra_seq))\n",
+    "print(\"nipah_seq_length : \", len(nipah_seq))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "50b5b53c",
+   "metadata": {},
+   "source": [
+    "### GC Content measurement"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "58ea8d49",
+   "metadata": {},
+   "source": [
+    "#### GC Contents \n",
+    "+ GC-content (or guanine-cytosine content) is the percentage of nitrogenous bases in a DNA or RNA molecule \n",
+    "that are either guanine (G) or cytosine (C)\n",
+    "\n",
+    "#### Usefulness\n",
+    "+ In polymerase chain reaction (PCR) experiments, the GC-content of short oligonucleotides known as primers is often used to predict their annealing temperature to the template DNA. \n",
+    "+ A higher GC-content level indicates a relatively higher melting temperature.\n",
+    "+ low GC-content resembles less stablility than high GC-content"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "d6cf90a0",
+   "metadata": {},
+   "source": [
+    "See more at : https://en.wikipedia.org/wiki/GC-content"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "012e9a26",
+   "metadata": {},
+   "source": [
+    "#### Method 1"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 27,
+   "id": "5d342d31",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "def gc_content(seq):\n",
+    "    result =  float(seq.count('G') + seq.count('C'))/len(seq) * 100\n",
+    "    return result"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 29,
+   "id": "57e012a7",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "39.442799166392454"
+      ]
+     },
+     "execution_count": 29,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "gc_content(hendra_seq)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 30,
+   "id": "b7b041ec",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "38.16726953852899"
+      ]
+     },
+     "execution_count": 30,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "gc_content(nipah_seq)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "7b2388fb",
+   "metadata": {},
+   "source": [
+    "#### Method 2"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 17,
+   "id": "4ff47816",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from Bio.SeqUtils import GC"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 32,
+   "id": "9b41f83e",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "39.442799166392454\n",
+      "38.16726953852899\n"
+     ]
+    }
+   ],
+   "source": [
+    "print(GC(hendra_seq))\n",
+    "print(GC(nipah_seq))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "f855e62e",
+   "metadata": {},
+   "source": [
+    "#### Narrative:  Hendra is slightly more stable than Nipah"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "d1e9ba5d",
+   "metadata": {},
+   "source": [
+    "### Translation"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "07f8b98c",
+   "metadata": {},
+   "source": [
+    "Translation is the process in which  cell “reads” the information in a messenger RNA (mRNA) and uses it to build a protein."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 118,
+   "id": "4b3a8430",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "hendra_protein = hendra_seq.translate()\n",
+    "nipah_protein = nipah_seq.translate()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 37,
+   "id": "451be2c8",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "6078\n",
+      "6082\n"
+     ]
+    }
+   ],
+   "source": [
+    "print(len(hendra_protein))\n",
+    "print(len(nipah_protein))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "77b14a84",
+   "metadata": {},
+   "source": [
+    "### Check for the Count of Amino Acids"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 53,
+   "id": "6164ee3a",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from collections import Counter"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 56,
+   "id": "196b22f6",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "hendra_freq = Counter(hendra_protein)\n",
+    "nipah_freq = Counter(nipah_protein)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "416e34fb",
+   "metadata": {},
+   "source": [
+    "alanine - ala - A \n",
+    "\n",
+    "arginine - arg - R \n",
+    "\n",
+    "asparagine - asn - N \n",
+    "\n",
+    "aspartic acid - asp - D\n",
+    "\n",
+    "cysteine - cys - C \n",
+    "\n",
+    "glutamine - gln - Q \n",
+    "\n",
+    "glutamic acid - glu - E \n",
+    "\n",
+    "glycine - gly - G \n",
+    "\n",
+    "histidine - his - H \n",
+    "\n",
+    "isoleucine - ile - I \n",
+    "\n",
+    "leucine - leu - L \n",
+    "\n",
+    "lysine - lys - K \n",
+    "\n",
+    "methionine - met - M \n",
+    "\n",
+    "phenylalanine - phe - F \n",
+    "\n",
+    "proline - pro - P \n",
+    "\n",
+    "serine - ser - S \n",
+    "\n",
+    "threonine - thr - T \n",
+    "\n",
+    "tryptophan - trp - W \n",
+    "\n",
+    "tyrosine - tyr - Y \n",
+    "\n",
+    "valine - val - V "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 57,
+   "id": "ed22fb96",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "Counter({'T': 348,\n",
+       "         'E': 217,\n",
+       "         'Q': 327,\n",
+       "         'G': 236,\n",
+       "         'I': 505,\n",
+       "         'W': 111,\n",
+       "         'R': 393,\n",
+       "         'V': 273,\n",
+       "         'K': 329,\n",
+       "         'L': 682,\n",
+       "         'M': 158,\n",
+       "         'F': 192,\n",
+       "         '*': 445,\n",
+       "         'P': 212,\n",
+       "         'D': 153,\n",
+       "         'N': 231,\n",
+       "         'C': 180,\n",
+       "         'S': 545,\n",
+       "         'Y': 195,\n",
+       "         'A': 145,\n",
+       "         'H': 201})"
+      ]
+     },
+     "execution_count": 57,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "hendra_freq"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "ce656457",
+   "metadata": {},
+   "source": [
+    " '*' denotes STOP Codon"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 121,
+   "id": "bdf10a03",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "[('L', 682),\n",
+       " ('S', 545),\n",
+       " ('I', 505),\n",
+       " ('*', 445),\n",
+       " ('R', 393),\n",
+       " ('T', 348),\n",
+       " ('K', 329),\n",
+       " ('Q', 327),\n",
+       " ('V', 273),\n",
+       " ('G', 236)]"
+      ]
+     },
+     "execution_count": 121,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "#Most common amino acid in Hendra Virus\n",
+    "Counter(hendra_protein).most_common(10)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 59,
+   "id": "c38908ad",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "[('L', 720),\n",
+       " ('S', 504),\n",
+       " ('*', 483),\n",
+       " ('I', 463),\n",
+       " ('R', 382),\n",
+       " ('T', 364),\n",
+       " ('K', 359),\n",
+       " ('Q', 322),\n",
+       " ('N', 266),\n",
+       " ('V', 245)]"
+      ]
+     },
+     "execution_count": 59,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "#Most common amino acid in Nipah Virus\n",
+    "Counter(nipah_protein).most_common(10)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 61,
+   "id": "a2b512e4",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Load Data Viz Pkgs\n",
+    "import numpy as np\n",
+    "import matplotlib.pyplot as plt"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 62,
+   "id": "b30e971c",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "<BarContainer object of 21 artists>"
+      ]
+     },
+     "execution_count": 62,
+     "metadata": {},
+     "output_type": "execute_result"
+    },
+    {
+     "data": {
+      "image/png": "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\n",
+      "text/plain": [
+       "<Figure size 432x288 with 1 Axes>"
+      ]
+     },
+     "metadata": {
+      "needs_background": "light"
+     },
+     "output_type": "display_data"
+    }
+   ],
+   "source": [
+    "# Plot the Amino Acids\n",
+    "plt.bar(hendra_freq.keys(), hendra_freq.values())"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 64,
+   "id": "bb4afbda",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "<BarContainer object of 21 artists>"
+      ]
+     },
+     "execution_count": 64,
+     "metadata": {},
+     "output_type": "execute_result"
+    },
+    {
+     "data": {
+      "image/png": "iVBORw0KGgoAAAANSUhEUgAAAXcAAAD4CAYAAAAXUaZHAAAAOXRFWHRTb2Z0d2FyZQBNYXRwbG90bGliIHZlcnNpb24zLjUuMSwgaHR0cHM6Ly9tYXRwbG90bGliLm9yZy/YYfK9AAAACXBIWXMAAAsTAAALEwEAmpwYAAAU9klEQVR4nO3df5BdZ33f8fcnMpYNlGJjWVEtgUyrkkhuMCCcYJrmh0ItMBOZFBM5NFFatWo6IglJUyLTzgCZ0YyHKQQm4GZUIBFNYqGQGCmQQlwxngRqUGQwxrJxLGxjK3IsYTcQAxWR/O0f9wiuVrvac3f3WtKj92tm55zz3Oe557urvZ997nPPvUpVIUlqy/ec6gIkSXPPcJekBhnuktQgw12SGmS4S1KDzjnVBQBcdNFFtXTp0lNdhiSdUW6//favVtWCyW47LcJ96dKl7Nmz51SXIUlnlCRfmeo2l2UkqUGGuyQ1yHCXpAYZ7pLUIMNdkhpkuEtSgwx3SWqQ4S5JDTLcJalBp8U7VKWz1dJNHxup/4M3XD2mStQaZ+6S1KBpwz3JC5LcMfT19SRvTHJhkluS3NdtLxgac32SfUnuTXLVeL8FSdJE04Z7Vd1bVZdX1eXAS4BvAjcDm4BdVbUM2NUdk2Q5sBZYAawGbkwybzzlS5ImM+qyzCrgy1X1FWANsLVr3wpc0+2vAbZV1eGqegDYB1wxB7VKknoaNdzXAjd1+wur6hGAbntx134J8PDQmP1d23GSbEiyJ8meQ4cOjViGJOlkeod7knOBnwT+cLquk7TVCQ1VW6pqZVWtXLBg0s+alyTN0Cgz91cCn6uqR7vjR5MsAui2B7v2/cCSoXGLgQOzLVSS1N8o4X4d312SAdgJrOv21wE7htrXJpmf5FJgGbB7toVKkvrr9SamJE8HXgH8h6HmG4DtSdYDDwHXAlTV3iTbgbuBI8DGqjo6p1VLkk6qV7hX1TeB50xoe4zB1TOT9d8MbJ51dZKkGfEdqpLUIMNdkhpkuEtSgwx3SWqQ4S5JDTLcJalBhrskNchwl6QGGe6S1CDDXZIaZLhLUoMMd0lqkOEuSQ0y3CWpQYa7JDXIcJekBhnuktQgw12SGmS4S1KDDHdJalCvcE/y7CQfTvKlJPckeVmSC5PckuS+bnvBUP/rk+xLcm+Sq8ZXviRpMn1n7u8GPl5V3we8ELgH2ATsqqplwK7umCTLgbXACmA1cGOSeXNduCRpatOGe5JnAf8CeD9AVX27qv4WWANs7bptBa7p9tcA26rqcFU9AOwDrpjbsiVJJ9Nn5v584BDwO0k+n+R9SZ4BLKyqRwC67cVd/0uAh4fG7+/ajpNkQ5I9SfYcOnRoVt+EJOl4fcL9HODFwH+vqhcB36BbgplCJmmrExqqtlTVyqpauWDBgl7FSpL66RPu+4H9VfXZ7vjDDML+0SSLALrtwaH+S4bGLwYOzE25kqQ+pg33qvob4OEkL+iaVgF3AzuBdV3bOmBHt78TWJtkfpJLgWXA7jmtWpJ0Uuf07PeLwO8nORe4H/g3DP4wbE+yHngIuBagqvYm2c7gD8ARYGNVHZ3zyiVJU+oV7lV1B7BykptWTdF/M7B55mVJkmbDd6hKUoMMd0lqkOEuSQ0y3CWpQYa7JDXIcJekBhnuktQgw12SGmS4S1KDDHdJapDhLkkNMtwlqUGGuyQ1yHCXpAYZ7pLUIMNdkhpkuEtSgwx3SWqQ4S5JDTLcJalBvcI9yYNJvpjkjiR7urYLk9yS5L5ue8FQ/+uT7Etyb5KrxlW8JGlyo8zcf6yqLq+qld3xJmBXVS0DdnXHJFkOrAVWAKuBG5PMm8OaJUnTOGcWY9cAP9rtbwVuBX69a99WVYeBB5LsA64AbpvFuSSdpZZu+thI/R+84eoxVXJm6TtzL+DPktyeZEPXtrCqHgHothd37ZcADw+N3d+1HSfJhiR7kuw5dOjQzKqXJE2q78z95VV1IMnFwC1JvnSSvpmkrU5oqNoCbAFYuXLlCbdLkmau18y9qg5024PAzQyWWR5Nsgig2x7suu8HlgwNXwwcmKuCJUnTmzbckzwjyT84tg/8S+AuYCewruu2DtjR7e8E1iaZn+RSYBmwe64LlyRNrc+yzELg5iTH+v9BVX08yV8C25OsBx4CrgWoqr1JtgN3A0eAjVV1dCzVS5ImNW24V9X9wAsnaX8MWDXFmM3A5llXpzOaVzlIp47vUJWkBhnuktQgw12SGmS4S1KDDHdJatBsPltGZ5BRrlzxqhXpzOfMXZIaZLhLUoMMd0lqkOEuSQ0y3CWpQYa7JDXIcJekBhnuktQgw12SGmS4S1KDDHdJapDhLkkNMtwlqUGGuyQ1qHe4J5mX5PNJPtodX5jkliT3ddsLhvpen2RfknuTXDWOwiVJUxtl5v7LwD1Dx5uAXVW1DNjVHZNkObAWWAGsBm5MMm9uypUk9dEr3JMsBq4G3jfUvAbY2u1vBa4Zat9WVYer6gFgH3DFnFQrSeql78z9XcCbgCeH2hZW1SMA3fbirv0S4OGhfvu7tuMk2ZBkT5I9hw4dGrVuSdJJTBvuSV4NHKyq23veZyZpqxMaqrZU1cqqWrlgwYKedy1J6qPP/6H6cuAnk7wKOA94VpLfAx5NsqiqHkmyCDjY9d8PLBkavxg4MJdFS5JObtqZe1VdX1WLq2opgxdKP1lV/xrYCazruq0DdnT7O4G1SeYnuRRYBuye88olSVPqM3Ofyg3A9iTrgYeAawGqam+S7cDdwBFgY1UdnXWlkqTeRgr3qroVuLXbfwxYNUW/zcDmWdamCZZu+thI/R+84eoxVSLpdOc7VCWpQYa7JDXIcJekBhnuktSg2Vwtc9oY5YVGX2SUdDZw5i5JDWpi5j5TXlooqVXO3CWpQYa7JDXIcJekBhnuktQgw12SGmS4S1KDDHdJapDhLkkNMtwlqUFn9TtUZ8N3t0o6nTlzl6QGGe6S1KBpwz3JeUl2J/lCkr1J3ta1X5jkliT3ddsLhsZcn2RfknuTXDXOb0CSdKI+M/fDwI9X1QuBy4HVSX4I2ATsqqplwK7umCTLgbXACmA1cGOSeWOoXZI0hWnDvQae6A6f1n0VsAbY2rVvBa7p9tcA26rqcFU9AOwDrpjLoiVJJ9drzT3JvCR3AAeBW6rqs8DCqnoEoNte3HW/BHh4aPj+rk2S9BTpFe5VdbSqLgcWA1ckuewk3TPZXZzQKdmQZE+SPYcOHepVrCSpn5GulqmqvwVuZbCW/miSRQDd9mDXbT+wZGjYYuDAJPe1papWVtXKBQsWjF65JGlKfa6WWZDk2d3++cBPAF8CdgLrum7rgB3d/k5gbZL5SS4FlgG757huSdJJ9HmH6iJga3fFy/cA26vqo0luA7YnWQ88BFwLUFV7k2wH7gaOABur6uh4ypckTWbacK+qO4EXTdL+GLBqijGbgc2zrk6SNCO+Q1WSGmS4S1KDDHdJapDhLkkN8vPcdVoa5fPy/ax86UTO3CWpQYa7JDXIcJekBhnuktQgw12SGuTVMtIZyiuKdDLO3CWpQYa7JDXIcJekBhnuktQgw12SGuTVMmrKKFeQgFeRqF3O3CWpQYa7JDXIZRlJvbnsdeaYNtyTLAE+CHwv8CSwpareneRC4EPAUuBB4HVV9X+7MdcD64GjwC9V1SfGUv0ZyAeHpKdCn2WZI8B/qqrvB34I2JhkObAJ2FVVy4Bd3THdbWuBFcBq4MYk88ZRvCRpctOGe1U9UlWf6/b/DrgHuARYA2ztum0Frun21wDbqupwVT0A7AOumOO6JUknMdKae5KlwIuAzwILq+oRGPwBSHJx1+0S4DNDw/Z3bRPvawOwAeC5z33uyIVLc80lM7Wk99UySZ4J/BHwxqr6+sm6TtJWJzRUbamqlVW1csGCBX3LkCT10GvmnuRpDIL996vqj7vmR5Ms6mbti4CDXft+YMnQ8MXAgbkqWDod+fG7Ot1MO3NPEuD9wD1V9c6hm3YC67r9dcCOofa1SeYnuRRYBuyeu5IlSdPpM3N/OfCzwBeT3NG1vRm4AdieZD3wEHAtQFXtTbIduJvBlTYbq+roXBcu6czis5un1rThXlWfYvJ1dIBVU4zZDGyeRV2SpFnwHaqSNIdOl6uu/GwZSWqQ4S5JDXJZRlKzTpclklPBmbskNchwl6QGGe6S1CDDXZIa5Auq0lnmbH6R8WzizF2SGmS4S1KDDHdJapDhLkkN8gVVSZrEmf4Rxc7cJalBhrskNchwl6QGGe6S1CDDXZIaZLhLUoOmDfckH0hyMMldQ20XJrklyX3d9oKh265Psi/JvUmuGlfhkqSp9Zm5/y6wekLbJmBXVS0DdnXHJFkOrAVWdGNuTDJvzqqVJPUybbhX1Z8Dj09oXgNs7fa3AtcMtW+rqsNV9QCwD7hibkqVJPU10zX3hVX1CEC3vbhrvwR4eKjf/q7tBEk2JNmTZM+hQ4dmWIYkaTJz/fEDmaStJutYVVuALQArV66ctI9OPT/7WzozzXTm/miSRQDd9mDXvh9YMtRvMXBg5uVJkmZipuG+E1jX7a8Ddgy1r00yP8mlwDJg9+xKlCSNatplmSQ3AT8KXJRkP/AW4AZge5L1wEPAtQBVtTfJduBu4AiwsaqOjql2SdIUpg33qrpuiptWTdF/M7B5NkVJkmbHd6hKUoMMd0lqkOEuSQ0y3CWpQYa7JDXIcJekBhnuktQgw12SGmS4S1KDDHdJapDhLkkNMtwlqUGGuyQ1yHCXpAYZ7pLUIMNdkhpkuEtSgwx3SWqQ4S5JDTLcJalBYwv3JKuT3JtkX5JN4zqPJOlEYwn3JPOA9wKvBJYD1yVZPo5zSZJONK6Z+xXAvqq6v6q+DWwD1ozpXJKkCVJVc3+nyWuB1VX177rjnwV+sKreMNRnA7ChO3wBcO8cl3ER8NUzaKz1np7nnM1Y6x3v2LPlnCfzvKpaMNkN58zxiY7JJG3H/RWpqi3AljGdnyR7qmrlmTLWek/Pc85mrPWOd+zZcs6ZGteyzH5gydDxYuDAmM4lSZpgXOH+l8CyJJcmORdYC+wc07kkSROMZVmmqo4keQPwCWAe8IGq2juOc53EbJZ8TsVY6z09zzmbsdY73rFnyzlnZCwvqEqSTi3foSpJDTLcJalBTYV7kuckuaP7+pskfz10fG6P8U8M7b8qyX1Jnttj3OIkO7r+9yd5T5L5PWtemOQPunG3J7ktyWt6jDvafV93JfmTJM/uc74J9/HE9L2+0/c3k7xx6PgTSd43dPyOJL86zX2k2751+LjHuSvJO4aOf+3YffQYe+zndOxraZ9xU4zt9TEaE/5t/jDJ00c4Z+9/k6Extya5akLbG5PcOEKte5N8IcmvJumVCxn4VJJXDrW9LsnHe4x9YsLxzyd5T5/zdv3/S1fznV39P9hz3Pcm2Zbky0nuTvKnSf5pz7Gv6X4Xv2+EOivJ/xw6PifJoSQf7XsfM9VUuFfVY1V1eVVdDvw28JvHjrt3yvaSZBXwWwzeiPXQNH0D/DHwkapaBiwDzgfe3uM8AT4C/HlVPb+qXsLgyqLFPcr8Vvd9XQY8DmzsMWY2/g9wJUD34L8IWDF0+5XAp6e5j9cneRNwXrd9fc9zHwZ+KslFo5UMfPfndOzrwVmMvWHEcZcB3wZ+YeSqR3MTg9+bYWu79ukcq3UF8ArgVcBb+py0Bi/Y/QLwziTnJXkGsJkx/y4meRnwauDFVfUDwE8AD/cYF+Bm4Naq+sdVtRx4M7Cw56mvAz7FiT/rk/kGcFmS87vjVwB/PcL4GWsq3OdCkh8G/gdwdVV9uceQHwf+X1X9DkBVHQV+Bfi5JM/sMfbbVfXbxxqq6itV9Vsjln0bcMmIY0b1abpwZxDqdwF/l+SC7lnK9wOfP9kdVNXvMXgQvgl4qDvu4wiDKw1+ZSaFn2J/AfyTMZ/jw8Crjz1b7J6d/CMGQdRbVR1k8K7xN/R9VlVVdwF/Avw6gz8KH+z5uJmNRcBXq+pwV8NXq6rP+2h+DPj7CY+3O6rqL6Yb2D2WXw6sZ7RwB/hfwNXd/nX0+6M7a4b78eYDO4BrqupLPcesAG4fbqiqrwMPMv2DegXwuRFrPE4GH9K2ijG/j6B78BzplqmuZPAH5bPAy4CVwJ3TPTtK8jMM3tz2duC53XFf72Uw8/+HI5Z+/tCyys2zGHtHkp8eZXCScxh8eN4XRzzvSKrqMWA3sLprWgt8qGZwKVxV3c8gFy4eYdjbgJ9h8L1O+4y1c9zPFviNEc73Z8CSJH+V5MYkP9Jz3GVMeKyO4Brg41X1V8DjSV48wthtwNok5wE/wOBxM3bj+viBM9XfM1h+WA/8cs8xYcJHKwy1jyTJe4F/zmA2/9Jpup/fPSiWMviFvWXU883Asdn7lcA7GTxbuBL4GoOf23RuqqpK8taqenvf2SEM/mAm+SDwS8C3Rqj5W90y3UzMdOyxfxsYzNzfP8Pzj+LY0syObvtvZ3FfI/3uVtU3knwIeOLYbLqH4362SX6ewSShz/meSPIS4IcZzMY/lGRTVf3uKHWP6DrgXd3+tu6418Ssqu7snk1dB/zpOIqbjDP34z0JvA54aZI39xyzlwm/lEmexWAdb7oPQ9sLfGcGUFUbGczCJ/0goAmOPTieB5zL+Nfc4bvr7v+MwbLMZxjM3Pustx9bo6Wq3jp8PIJ3MfjD+4wRxz3Vhtfqf3GU13tm4SPAqm5GeX5VzegZYZLnA0eBgyMOfbL7ekpU1dGqurWq3gK8AfhXPYbtBV4y6rmSPIfBEur7kjwI/Gfgp0eZnDB4Zv3feIqWZMBwP0FVfZPBizWvT7K+x5BdwNOT/Bx8Z5nkHcB7qmq6GeYnGby4+B+H2npfWdHV+zUGs9lfS/K0UcbOwKcZ/Gwe7x5cjwPPZhDwt4353HTn284g4DWkqp4AbgU+wAwDJMkCBhcivGcmSzpPlSQvSLJsqOly4Cs9hn4SmJ/k3w/d10t7LOu8lsFrCc+rqqVVtQR4gMGz7L4+APxGVY11iW6Y4T6JLkRWA/81yUk/h757ELwGeG2S+4DHgCeranOP8xSDtbwfSfJAkt3AVgYvTo1S7+eBLzD6Cz2j+iKDq2Q+M6Hta1U11x9lOpV3dDU8FSauufe9WmY2np5k/9DXSS8vneAm4IUMlg36OvY97gX+N4P17LeNMP5UeCawtbuU8U4G/yHQW6cbNPRYfUV3KeTebtx0L8Zex+Aqm2F/xOB1hl6qan9Vvbtv/7ngxw/MsSRXMniQ/VRVzfTFG0maFcNdkhrksowkNchwl6QGGe6S1CDDXZIaZLhLUoMMd0lq0P8HlAaLmC14/PAAAAAASUVORK5CYII=\n",
+      "text/plain": [
+       "<Figure size 432x288 with 1 Axes>"
+      ]
+     },
+     "metadata": {
+      "needs_background": "light"
+     },
+     "output_type": "display_data"
+    }
+   ],
+   "source": [
+    "# plot of amino acids\n",
+    "plt.bar(nipah_freq.keys(), nipah_freq.values())"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "dfbbaf8c",
+   "metadata": {},
+   "source": [
+    "###  Alignment"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "611a3438",
+   "metadata": {},
+   "source": [
+    "Alignment Types\n",
+    "\n",
+    "Global alignment: finds the best concordance/agreement betwenn all characters in two sequences\n",
+    "\n",
+    "Local Alignment: finds just the subsequences that align the best"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 78,
+   "id": "6da654ce",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from Bio import pairwise2\n",
+    "from Bio.pairwise2 import format_alignment"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 83,
+   "id": "9bdfdabe",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#Pairwise alignemt for first 500 nucleotide\n",
+    "alignments = pairwise2.align.globalxx(hendra_seq[0:500],nipah_seq[0:500],one_alignment_only=True,score_only=True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 84,
+   "id": "930da862",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "408.0\n"
+     ]
+    }
+   ],
+   "source": [
+    "print(alignments)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "c31cf8a4",
+   "metadata": {},
+   "source": [
+    "#### Check for similarity or percentage of similarity\n",
+    "fraction of nucleotides that is the same/ total number of nucleotides * 100%"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 85,
+   "id": "821739f9",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "81.6"
+      ]
+     },
+     "execution_count": 85,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "alignments/500 *100"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "5c947e48",
+   "metadata": {},
+   "source": [
+    "Hamming distance: shows how many places 2 strings differ\n",
+    "\n",
+    "Hamming distance between two strings of equal length is the number of positions at which the corresponding symbols are different.\n",
+    "\n",
+    "In other words, it measures the minimum number of substitutions required to change one string into the other, or the minimum number of errors that could have transformed one string into the other\n",
+    "\n",
+    "It is used for error detection or error correction\n",
+    "\n",
+    "It is used to quantify the similarity of DNA sequences,\n",
+    "\n",
+    "For checking the edit distance:\n",
+    "    edit distance is a way of quantifying how dissimilar two strings (e.g., words) are to one another by counting the minimum number of operations required to transform one string into the other. eg Levenshtein distance"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 86,
+   "id": "a4c9041b",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "def hamming_distance(lhs,rhs):\n",
+    "    return len([(x,y) for x,y in zip(lhs,rhs) if x != y])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 87,
+   "id": "7ba1ca75",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "12297"
+      ]
+     },
+     "execution_count": 87,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "hamming_distance(hendra_seq,nipah_seq)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 88,
+   "id": "3387cb9c",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "18234"
+      ]
+     },
+     "execution_count": 88,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "len(hendra_seq)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 89,
+   "id": "d3a43602",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "18246"
+      ]
+     },
+     "execution_count": 89,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "len(nipah_seq)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "9bc330b4",
+   "metadata": {},
+   "source": [
+    "## Dot Plots"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "145100c0",
+   "metadata": {},
+   "source": [
+    "A dot plot is a graphical method that allows the comparison of two biological sequences and identify regions of close similarity between them.\n",
+    "\n",
+    "Simplest method - put a dot wherever sequences are identical\n",
+    "\n",
+    "Dot plots compare two sequences by organizing one sequence on the x-axis, and another on the y-axis, of a plot.\n",
+    "\n",
+    "When the residues of both sequences match at the same location on the plot, a dot is drawn at the corresponding position\n",
+    "usefulness\n",
+    "0\n",
+    "Dot plots can also be used to visually inspect sequences for\n",
+    "\n",
+    "-direct or inverted repeats\n",
+    "-regions with low sequence complexity.\n",
+    "-Similar regions\n",
+    "-Repeated sequences\n",
+    "-Sequence rearrangements\n",
+    "-RNA structures\n",
+    "-Gene order\n",
+    "\n",
+    "Link :https://stackoverflow.com/questions/40822400/how-to-create-a-dotplot-of-two-dna-sequence-in-python"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 90,
+   "id": "177d5f35",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "def delta(x,y):\n",
+    "    return 0 if x == y else 1\n",
+    "\n",
+    "\n",
+    "def M(seq1,seq2,i,j,k):\n",
+    "    return sum(delta(x,y) for x,y in zip(seq1[i:i+k],seq2[j:j+k]))\n",
+    "\n",
+    "\n",
+    "def makeMatrix(seq1,seq2,k):\n",
+    "    n = len(seq1)\n",
+    "    m = len(seq2)\n",
+    "    return [[M(seq1,seq2,i,j,k) for j in range(m-k+1)] for i in range(n-k+1)]\n",
+    "\n",
+    "\n",
+    "def plotMatrix(M,t, seq1, seq2, nonblank = chr(0x25A0), blank = ' '):\n",
+    "    print(' |' + seq2)\n",
+    "    print('-'*(2 + len(seq2)))\n",
+    "    for label,row in zip(seq1,M):\n",
+    "        line = ''.join(nonblank if s < t else blank for s in row)\n",
+    "        print(label + '|' + line)\n",
+    "\n",
+    "\n",
+    "def dotplot(seq1,seq2,k = 1,t = 1):\n",
+    "    M = makeMatrix(seq1,seq2,k)\n",
+    "    plotMatrix(M, t, seq1,seq2) #experiment with character choice"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 108,
+   "id": "1bffc248",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      " |ACCAAACAAGGGAGAATATGGATACGTTAAAATATATAACGTATTTTTAAAACTTAGGAACCAAGACAAACACTTTTGGTCTTGGTATTGGATCCTCAAGAAATATATCATCATGAGTGATATCTTTGAAGAGGCGGCTAGTTTTAGGAGTTATCAATCTAAGTTAGGGAGAGATGGGAGGGCTAGTGCAGCAACTGCTA\n",
+      "----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n",
+      "A|■  ■■■ ■■   ■ ■■ ■   ■ ■    ■■■■ ■ ■ ■■   ■     ■■■■   ■  ■■  ■■ ■ ■■■ ■              ■    ■     ■■ ■■■ ■ ■  ■  ■  ■   ■ ■      ■■ ■       ■     ■  ■   ■  ■■   ■■   ■   ■ ■ ■    ■     ■    ■  ■■     ■\n",
+      "C| ■■   ■                 ■              ■            ■       ■■    ■   ■ ■       ■            ■■ ■           ■  ■           ■          ■  ■                ■   ■                       ■     ■  ■  ■  ■  \n",
+      "C| ■■   ■                 ■              ■            ■       ■■    ■   ■ ■       ■            ■■ ■           ■  ■           ■          ■  ■                ■   ■                       ■     ■  ■  ■  ■  \n",
+      "G|         ■■■ ■     ■■    ■              ■               ■■      ■            ■■    ■■    ■■        ■              ■ ■ ■        ■  ■ ■■ ■■   ■     ■■ ■            ■   ■■■ ■ ■  ■■■ ■■■   ■ ■  ■     ■   \n",
+      "A|■  ■■■ ■■   ■ ■■ ■   ■ ■    ■■■■ ■ ■ ■■   ■     ■■■■   ■  ■■  ■■ ■ ■■■ ■              ■    ■     ■■ ■■■ ■ ■  ■  ■  ■   ■ ■      ■■ ■       ■     ■  ■   ■  ■■   ■■   ■   ■ ■ ■    ■     ■    ■  ■■     ■\n",
+      "A|■  ■■■ ■■   ■ ■■ ■   ■ ■    ■■■■ ■ ■ ■■   ■     ■■■■   ■  ■■  ■■ ■ ■■■ ■              ■    ■     ■■ ■■■ ■ ■  ■  ■  ■   ■ ■      ■■ ■       ■     ■  ■   ■  ■■   ■■   ■   ■ ■ ■    ■     ■    ■  ■■     ■\n",
+      "C| ■■   ■                 ■              ■            ■       ■■    ■   ■ ■       ■            ■■ ■           ■  ■           ■          ■  ■                ■   ■                       ■     ■  ■  ■  ■  \n",
+      "A|■  ■■■ ■■   ■ ■■ ■   ■ ■    ■■■■ ■ ■ ■■   ■     ■■■■   ■  ■■  ■■ ■ ■■■ ■              ■    ■     ■■ ■■■ ■ ■  ■  ■  ■   ■ ■      ■■ ■       ■     ■  ■   ■  ■■   ■■   ■   ■ ■ ■    ■     ■    ■  ■■     ■\n",
+      "A|■  ■■■ ■■   ■ ■■ ■   ■ ■    ■■■■ ■ ■ ■■   ■     ■■■■   ■  ■■  ■■ ■ ■■■ ■              ■    ■     ■■ ■■■ ■ ■  ■  ■  ■   ■ ■      ■■ ■       ■     ■  ■   ■  ■■   ■■   ■   ■ ■ ■    ■     ■    ■  ■■     ■\n",
+      "G|         ■■■ ■     ■■    ■              ■               ■■      ■            ■■    ■■    ■■        ■              ■ ■ ■        ■  ■ ■■ ■■   ■     ■■ ■            ■   ■■■ ■ ■  ■■■ ■■■   ■ ■  ■     ■   \n",
+      "G|         ■■■ ■     ■■    ■              ■               ■■      ■            ■■    ■■    ■■        ■              ■ ■ ■        ■  ■ ■■ ■■   ■     ■■ ■            ■   ■■■ ■ ■  ■■■ ■■■   ■ ■  ■     ■   \n",
+      "G|         ■■■ ■     ■■    ■              ■               ■■      ■            ■■    ■■    ■■        ■              ■ ■ ■        ■  ■ ■■ ■■   ■     ■■ ■            ■   ■■■ ■ ■  ■■■ ■■■   ■ ■  ■     ■   \n",
+      "G|         ■■■ ■     ■■    ■              ■               ■■      ■            ■■    ■■    ■■        ■              ■ ■ ■        ■  ■ ■■ ■■   ■     ■■ ■            ■   ■■■ ■ ■  ■■■ ■■■   ■ ■  ■     ■   \n",
+      "A|■  ■■■ ■■   ■ ■■ ■   ■ ■    ■■■■ ■ ■ ■■   ■     ■■■■   ■  ■■  ■■ ■ ■■■ ■              ■    ■     ■■ ■■■ ■ ■  ■  ■  ■   ■ ■      ■■ ■       ■     ■  ■   ■  ■■   ■■   ■   ■ ■ ■    ■     ■    ■  ■■     ■\n",
+      "A|■  ■■■ ■■   ■ ■■ ■   ■ ■    ■■■■ ■ ■ ■■   ■     ■■■■   ■  ■■  ■■ ■ ■■■ ■              ■    ■     ■■ ■■■ ■ ■  ■  ■  ■   ■ ■      ■■ ■       ■     ■  ■   ■  ■■   ■■   ■   ■ ■ ■    ■     ■    ■  ■■     ■\n",
+      "A|■  ■■■ ■■   ■ ■■ ■   ■ ■    ■■■■ ■ ■ ■■   ■     ■■■■   ■  ■■  ■■ ■ ■■■ ■              ■    ■     ■■ ■■■ ■ ■  ■  ■  ■   ■ ■      ■■ ■       ■     ■  ■   ■  ■■   ■■   ■   ■ ■ ■    ■     ■    ■  ■■     ■\n",
+      "T|                ■ ■   ■   ■■    ■ ■ ■    ■ ■■■■■     ■■                  ■■■■  ■ ■■  ■ ■■   ■  ■       ■ ■ ■  ■  ■   ■  ■ ■ ■■■           ■  ■■■■     ■■ ■   ■ ■   ■■         ■        ■  ■        ■  ■ \n",
+      "A|■  ■■■ ■■   ■ ■■ ■   ■ ■    ■■■■ ■ ■ ■■   ■     ■■■■   ■  ■■  ■■ ■ ■■■ ■              ■    ■     ■■ ■■■ ■ ■  ■  ■  ■   ■ ■      ■■ ■       ■     ■  ■   ■  ■■   ■■   ■   ■ ■ ■    ■     ■    ■  ■■     ■\n",
+      "T|                ■ ■   ■   ■■    ■ ■ ■    ■ ■■■■■     ■■                  ■■■■  ■ ■■  ■ ■■   ■  ■       ■ ■ ■  ■  ■   ■  ■ ■ ■■■           ■  ■■■■     ■■ ■   ■ ■   ■■         ■        ■  ■        ■  ■ \n",
+      "G|         ■■■ ■     ■■    ■              ■               ■■      ■            ■■    ■■    ■■        ■              ■ ■ ■        ■  ■ ■■ ■■   ■     ■■ ■            ■   ■■■ ■ ■  ■■■ ■■■   ■ ■  ■     ■   \n",
+      "G|         ■■■ ■     ■■    ■              ■               ■■      ■            ■■    ■■    ■■        ■              ■ ■ ■        ■  ■ ■■ ■■   ■     ■■ ■            ■   ■■■ ■ ■  ■■■ ■■■   ■ ■  ■     ■   \n",
+      "A|■  ■■■ ■■   ■ ■■ ■   ■ ■    ■■■■ ■ ■ ■■   ■     ■■■■   ■  ■■  ■■ ■ ■■■ ■              ■    ■     ■■ ■■■ ■ ■  ■  ■  ■   ■ ■      ■■ ■       ■     ■  ■   ■  ■■   ■■   ■   ■ ■ ■    ■     ■    ■  ■■     ■\n",
+      "T|                ■ ■   ■   ■■    ■ ■ ■    ■ ■■■■■     ■■                  ■■■■  ■ ■■  ■ ■■   ■  ■       ■ ■ ■  ■  ■   ■  ■ ■ ■■■           ■  ■■■■     ■■ ■   ■ ■   ■■         ■        ■  ■        ■  ■ \n",
+      "A|■  ■■■ ■■   ■ ■■ ■   ■ ■    ■■■■ ■ ■ ■■   ■     ■■■■   ■  ■■  ■■ ■ ■■■ ■              ■    ■     ■■ ■■■ ■ ■  ■  ■  ■   ■ ■      ■■ ■       ■     ■  ■   ■  ■■   ■■   ■   ■ ■ ■    ■     ■    ■  ■■     ■\n",
+      "C| ■■   ■                 ■              ■            ■       ■■    ■   ■ ■       ■            ■■ ■           ■  ■           ■          ■  ■                ■   ■                       ■     ■  ■  ■  ■  \n",
+      "G|         ■■■ ■     ■■    ■              ■               ■■      ■            ■■    ■■    ■■        ■              ■ ■ ■        ■  ■ ■■ ■■   ■     ■■ ■            ■   ■■■ ■ ■  ■■■ ■■■   ■ ■  ■     ■   \n",
+      "T|                ■ ■   ■   ■■    ■ ■ ■    ■ ■■■■■     ■■                  ■■■■  ■ ■■  ■ ■■   ■  ■       ■ ■ ■  ■  ■   ■  ■ ■ ■■■           ■  ■■■■     ■■ ■   ■ ■   ■■         ■        ■  ■        ■  ■ \n",
+      "G|         ■■■ ■     ■■    ■              ■               ■■      ■            ■■    ■■    ■■        ■              ■ ■ ■        ■  ■ ■■ ■■   ■     ■■ ■            ■   ■■■ ■ ■  ■■■ ■■■   ■ ■  ■     ■   \n",
+      "T|                ■ ■   ■   ■■    ■ ■ ■    ■ ■■■■■     ■■                  ■■■■  ■ ■■  ■ ■■   ■  ■       ■ ■ ■  ■  ■   ■  ■ ■ ■■■           ■  ■■■■     ■■ ■   ■ ■   ■■         ■        ■  ■        ■  ■ \n",
+      "T|                ■ ■   ■   ■■    ■ ■ ■    ■ ■■■■■     ■■                  ■■■■  ■ ■■  ■ ■■   ■  ■       ■ ■ ■  ■  ■   ■  ■ ■ ■■■           ■  ■■■■     ■■ ■   ■ ■   ■■         ■        ■  ■        ■  ■ \n",
+      "A|■  ■■■ ■■   ■ ■■ ■   ■ ■    ■■■■ ■ ■ ■■   ■     ■■■■   ■  ■■  ■■ ■ ■■■ ■              ■    ■     ■■ ■■■ ■ ■  ■  ■  ■   ■ ■      ■■ ■       ■     ■  ■   ■  ■■   ■■   ■   ■ ■ ■    ■     ■    ■  ■■     ■\n",
+      "A|■  ■■■ ■■   ■ ■■ ■   ■ ■    ■■■■ ■ ■ ■■   ■     ■■■■   ■  ■■  ■■ ■ ■■■ ■              ■    ■     ■■ ■■■ ■ ■  ■  ■  ■   ■ ■      ■■ ■       ■     ■  ■   ■  ■■   ■■   ■   ■ ■ ■    ■     ■    ■  ■■     ■\n",
+      "A|■  ■■■ ■■   ■ ■■ ■   ■ ■    ■■■■ ■ ■ ■■   ■     ■■■■   ■  ■■  ■■ ■ ■■■ ■              ■    ■     ■■ ■■■ ■ ■  ■  ■  ■   ■ ■      ■■ ■       ■     ■  ■   ■  ■■   ■■   ■   ■ ■ ■    ■     ■    ■  ■■     ■\n",
+      "A|■  ■■■ ■■   ■ ■■ ■   ■ ■    ■■■■ ■ ■ ■■   ■     ■■■■   ■  ■■  ■■ ■ ■■■ ■              ■    ■     ■■ ■■■ ■ ■  ■  ■  ■   ■ ■      ■■ ■       ■     ■  ■   ■  ■■   ■■   ■   ■ ■ ■    ■     ■    ■  ■■     ■\n",
+      "A|■  ■■■ ■■   ■ ■■ ■   ■ ■    ■■■■ ■ ■ ■■   ■     ■■■■   ■  ■■  ■■ ■ ■■■ ■              ■    ■     ■■ ■■■ ■ ■  ■  ■  ■   ■ ■      ■■ ■       ■     ■  ■   ■  ■■   ■■   ■   ■ ■ ■    ■     ■    ■  ■■     ■\n",
+      "A|■  ■■■ ■■   ■ ■■ ■   ■ ■    ■■■■ ■ ■ ■■   ■     ■■■■   ■  ■■  ■■ ■ ■■■ ■              ■    ■     ■■ ■■■ ■ ■  ■  ■  ■   ■ ■      ■■ ■       ■     ■  ■   ■  ■■   ■■   ■   ■ ■ ■    ■     ■    ■  ■■     ■\n",
+      "C| ■■   ■                 ■              ■            ■       ■■    ■   ■ ■       ■            ■■ ■           ■  ■           ■          ■  ■                ■   ■                       ■     ■  ■  ■  ■  \n",
+      "T|                ■ ■   ■   ■■    ■ ■ ■    ■ ■■■■■     ■■                  ■■■■  ■ ■■  ■ ■■   ■  ■       ■ ■ ■  ■  ■   ■  ■ ■ ■■■           ■  ■■■■     ■■ ■   ■ ■   ■■         ■        ■  ■        ■  ■ \n",
+      "G|         ■■■ ■     ■■    ■              ■               ■■      ■            ■■    ■■    ■■        ■              ■ ■ ■        ■  ■ ■■ ■■   ■     ■■ ■            ■   ■■■ ■ ■  ■■■ ■■■   ■ ■  ■     ■   \n",
+      "C| ■■   ■                 ■              ■            ■       ■■    ■   ■ ■       ■            ■■ ■           ■  ■           ■          ■  ■                ■   ■                       ■     ■  ■  ■  ■  \n",
+      "G|         ■■■ ■     ■■    ■              ■               ■■      ■            ■■    ■■    ■■        ■              ■ ■ ■        ■  ■ ■■ ■■   ■     ■■ ■            ■   ■■■ ■ ■  ■■■ ■■■   ■ ■  ■     ■   \n",
+      "T|                ■ ■   ■   ■■    ■ ■ ■    ■ ■■■■■     ■■                  ■■■■  ■ ■■  ■ ■■   ■  ■       ■ ■ ■  ■  ■   ■  ■ ■ ■■■           ■  ■■■■     ■■ ■   ■ ■   ■■         ■        ■  ■        ■  ■ \n",
+      "A|■  ■■■ ■■   ■ ■■ ■   ■ ■    ■■■■ ■ ■ ■■   ■     ■■■■   ■  ■■  ■■ ■ ■■■ ■              ■    ■     ■■ ■■■ ■ ■  ■  ■  ■   ■ ■      ■■ ■       ■     ■  ■   ■  ■■   ■■   ■   ■ ■ ■    ■     ■    ■  ■■     ■\n",
+      "T|                ■ ■   ■   ■■    ■ ■ ■    ■ ■■■■■     ■■                  ■■■■  ■ ■■  ■ ■■   ■  ■       ■ ■ ■  ■  ■   ■  ■ ■ ■■■           ■  ■■■■     ■■ ■   ■ ■   ■■         ■        ■  ■        ■  ■ \n",
+      "G|         ■■■ ■     ■■    ■              ■               ■■      ■            ■■    ■■    ■■        ■              ■ ■ ■        ■  ■ ■■ ■■   ■     ■■ ■            ■   ■■■ ■ ■  ■■■ ■■■   ■ ■  ■     ■   \n",
+      "T|                ■ ■   ■   ■■    ■ ■ ■    ■ ■■■■■     ■■                  ■■■■  ■ ■■  ■ ■■   ■  ■       ■ ■ ■  ■  ■   ■  ■ ■ ■■■           ■  ■■■■     ■■ ■   ■ ■   ■■         ■        ■  ■        ■  ■ \n",
+      "T|                ■ ■   ■   ■■    ■ ■ ■    ■ ■■■■■     ■■                  ■■■■  ■ ■■  ■ ■■   ■  ■       ■ ■ ■  ■  ■   ■  ■ ■ ■■■           ■  ■■■■     ■■ ■   ■ ■   ■■         ■        ■  ■        ■  ■ \n",
+      "T|                ■ ■   ■   ■■    ■ ■ ■    ■ ■■■■■     ■■                  ■■■■  ■ ■■  ■ ■■   ■  ■       ■ ■ ■  ■  ■   ■  ■ ■ ■■■           ■  ■■■■     ■■ ■   ■ ■   ■■         ■        ■  ■        ■  ■ \n",
+      "A|■  ■■■ ■■   ■ ■■ ■   ■ ■    ■■■■ ■ ■ ■■   ■     ■■■■   ■  ■■  ■■ ■ ■■■ ■              ■    ■     ■■ ■■■ ■ ■  ■  ■  ■   ■ ■      ■■ ■       ■     ■  ■   ■  ■■   ■■   ■   ■ ■ ■    ■     ■    ■  ■■     ■\n",
+      "A|■  ■■■ ■■   ■ ■■ ■   ■ ■    ■■■■ ■ ■ ■■   ■     ■■■■   ■  ■■  ■■ ■ ■■■ ■              ■    ■     ■■ ■■■ ■ ■  ■  ■  ■   ■ ■      ■■ ■       ■     ■  ■   ■  ■■   ■■   ■   ■ ■ ■    ■     ■    ■  ■■     ■\n",
+      "A|■  ■■■ ■■   ■ ■■ ■   ■ ■    ■■■■ ■ ■ ■■   ■     ■■■■   ■  ■■  ■■ ■ ■■■ ■              ■    ■     ■■ ■■■ ■ ■  ■  ■  ■   ■ ■      ■■ ■       ■     ■  ■   ■  ■■   ■■   ■   ■ ■ ■    ■     ■    ■  ■■     ■\n",
+      "A|■  ■■■ ■■   ■ ■■ ■   ■ ■    ■■■■ ■ ■ ■■   ■     ■■■■   ■  ■■  ■■ ■ ■■■ ■              ■    ■     ■■ ■■■ ■ ■  ■  ■  ■   ■ ■      ■■ ■       ■     ■  ■   ■  ■■   ■■   ■   ■ ■ ■    ■     ■    ■  ■■     ■\n",
+      "C| ■■   ■                 ■              ■            ■       ■■    ■   ■ ■       ■            ■■ ■           ■  ■           ■          ■  ■                ■   ■                       ■     ■  ■  ■  ■  \n",
+      "T|                ■ ■   ■   ■■    ■ ■ ■    ■ ■■■■■     ■■                  ■■■■  ■ ■■  ■ ■■   ■  ■       ■ ■ ■  ■  ■   ■  ■ ■ ■■■           ■  ■■■■     ■■ ■   ■ ■   ■■         ■        ■  ■        ■  ■ \n",
+      "T|                ■ ■   ■   ■■    ■ ■ ■    ■ ■■■■■     ■■                  ■■■■  ■ ■■  ■ ■■   ■  ■       ■ ■ ■  ■  ■   ■  ■ ■ ■■■           ■  ■■■■     ■■ ■   ■ ■   ■■         ■        ■  ■        ■  ■ \n",
+      "A|■  ■■■ ■■   ■ ■■ ■   ■ ■    ■■■■ ■ ■ ■■   ■     ■■■■   ■  ■■  ■■ ■ ■■■ ■              ■    ■     ■■ ■■■ ■ ■  ■  ■  ■   ■ ■      ■■ ■       ■     ■  ■   ■  ■■   ■■   ■   ■ ■ ■    ■     ■    ■  ■■     ■\n",
+      "G|         ■■■ ■     ■■    ■              ■               ■■      ■            ■■    ■■    ■■        ■              ■ ■ ■        ■  ■ ■■ ■■   ■     ■■ ■            ■   ■■■ ■ ■  ■■■ ■■■   ■ ■  ■     ■   \n",
+      "G|         ■■■ ■     ■■    ■              ■               ■■      ■            ■■    ■■    ■■        ■              ■ ■ ■        ■  ■ ■■ ■■   ■     ■■ ■            ■   ■■■ ■ ■  ■■■ ■■■   ■ ■  ■     ■   \n",
+      "A|■  ■■■ ■■   ■ ■■ ■   ■ ■    ■■■■ ■ ■ ■■   ■     ■■■■   ■  ■■  ■■ ■ ■■■ ■              ■    ■     ■■ ■■■ ■ ■  ■  ■  ■   ■ ■      ■■ ■       ■     ■  ■   ■  ■■   ■■   ■   ■ ■ ■    ■     ■    ■  ■■     ■\n",
+      "A|■  ■■■ ■■   ■ ■■ ■   ■ ■    ■■■■ ■ ■ ■■   ■     ■■■■   ■  ■■  ■■ ■ ■■■ ■              ■    ■     ■■ ■■■ ■ ■  ■  ■  ■   ■ ■      ■■ ■       ■     ■  ■   ■  ■■   ■■   ■   ■ ■ ■    ■     ■    ■  ■■     ■\n",
+      "C| ■■   ■                 ■              ■            ■       ■■    ■   ■ ■       ■            ■■ ■           ■  ■           ■          ■  ■                ■   ■                       ■     ■  ■  ■  ■  \n",
+      "C| ■■   ■                 ■              ■            ■       ■■    ■   ■ ■       ■            ■■ ■           ■  ■           ■          ■  ■                ■   ■                       ■     ■  ■  ■  ■  \n",
+      "A|■  ■■■ ■■   ■ ■■ ■   ■ ■    ■■■■ ■ ■ ■■   ■     ■■■■   ■  ■■  ■■ ■ ■■■ ■              ■    ■     ■■ ■■■ ■ ■  ■  ■  ■   ■ ■      ■■ ■       ■     ■  ■   ■  ■■   ■■   ■   ■ ■ ■    ■     ■    ■  ■■     ■\n",
+      "A|■  ■■■ ■■   ■ ■■ ■   ■ ■    ■■■■ ■ ■ ■■   ■     ■■■■   ■  ■■  ■■ ■ ■■■ ■              ■    ■     ■■ ■■■ ■ ■  ■  ■  ■   ■ ■      ■■ ■       ■     ■  ■   ■  ■■   ■■   ■   ■ ■ ■    ■     ■    ■  ■■     ■\n",
+      "G|         ■■■ ■     ■■    ■              ■               ■■      ■            ■■    ■■    ■■        ■              ■ ■ ■        ■  ■ ■■ ■■   ■     ■■ ■            ■   ■■■ ■ ■  ■■■ ■■■   ■ ■  ■     ■   \n",
+      "A|■  ■■■ ■■   ■ ■■ ■   ■ ■    ■■■■ ■ ■ ■■   ■     ■■■■   ■  ■■  ■■ ■ ■■■ ■              ■    ■     ■■ ■■■ ■ ■  ■  ■  ■   ■ ■      ■■ ■       ■     ■  ■   ■  ■■   ■■   ■   ■ ■ ■    ■     ■    ■  ■■     ■\n",
+      "C| ■■   ■                 ■              ■            ■       ■■    ■   ■ ■       ■            ■■ ■           ■  ■           ■          ■  ■                ■   ■                       ■     ■  ■  ■  ■  \n",
+      "A|■  ■■■ ■■   ■ ■■ ■   ■ ■    ■■■■ ■ ■ ■■   ■     ■■■■   ■  ■■  ■■ ■ ■■■ ■              ■    ■     ■■ ■■■ ■ ■  ■  ■  ■   ■ ■      ■■ ■       ■     ■  ■   ■  ■■   ■■   ■   ■ ■ ■    ■     ■    ■  ■■     ■\n",
+      "G|         ■■■ ■     ■■    ■              ■               ■■      ■            ■■    ■■    ■■        ■              ■ ■ ■        ■  ■ ■■ ■■   ■     ■■ ■            ■   ■■■ ■ ■  ■■■ ■■■   ■ ■  ■     ■   \n",
+      "T|                ■ ■   ■   ■■    ■ ■ ■    ■ ■■■■■     ■■                  ■■■■  ■ ■■  ■ ■■   ■  ■       ■ ■ ■  ■  ■   ■  ■ ■ ■■■           ■  ■■■■     ■■ ■   ■ ■   ■■         ■        ■  ■        ■  ■ \n",
+      "G|         ■■■ ■     ■■    ■              ■               ■■      ■            ■■    ■■    ■■        ■              ■ ■ ■        ■  ■ ■■ ■■   ■     ■■ ■            ■   ■■■ ■ ■  ■■■ ■■■   ■ ■  ■     ■   \n",
+      "A|■  ■■■ ■■   ■ ■■ ■   ■ ■    ■■■■ ■ ■ ■■   ■     ■■■■   ■  ■■  ■■ ■ ■■■ ■              ■    ■     ■■ ■■■ ■ ■  ■  ■  ■   ■ ■      ■■ ■       ■     ■  ■   ■  ■■   ■■   ■   ■ ■ ■    ■     ■    ■  ■■     ■\n",
+      "C| ■■   ■                 ■              ■            ■       ■■    ■   ■ ■       ■            ■■ ■           ■  ■           ■          ■  ■                ■   ■                       ■     ■  ■  ■  ■  \n",
+      "A|■  ■■■ ■■   ■ ■■ ■   ■ ■    ■■■■ ■ ■ ■■   ■     ■■■■   ■  ■■  ■■ ■ ■■■ ■              ■    ■     ■■ ■■■ ■ ■  ■  ■  ■   ■ ■      ■■ ■       ■     ■  ■   ■  ■■   ■■   ■   ■ ■ ■    ■     ■    ■  ■■     ■\n",
+      "A|■  ■■■ ■■   ■ ■■ ■   ■ ■    ■■■■ ■ ■ ■■   ■     ■■■■   ■  ■■  ■■ ■ ■■■ ■              ■    ■     ■■ ■■■ ■ ■  ■  ■  ■   ■ ■      ■■ ■       ■     ■  ■   ■  ■■   ■■   ■   ■ ■ ■    ■     ■    ■  ■■     ■\n",
+      "T|                ■ ■   ■   ■■    ■ ■ ■    ■ ■■■■■     ■■                  ■■■■  ■ ■■  ■ ■■   ■  ■       ■ ■ ■  ■  ■   ■  ■ ■ ■■■           ■  ■■■■     ■■ ■   ■ ■   ■■         ■        ■  ■        ■  ■ \n",
+      "T|                ■ ■   ■   ■■    ■ ■ ■    ■ ■■■■■     ■■                  ■■■■  ■ ■■  ■ ■■   ■  ■       ■ ■ ■  ■  ■   ■  ■ ■ ■■■           ■  ■■■■     ■■ ■   ■ ■   ■■         ■        ■  ■        ■  ■ \n",
+      "G|         ■■■ ■     ■■    ■              ■               ■■      ■            ■■    ■■    ■■        ■              ■ ■ ■        ■  ■ ■■ ■■   ■     ■■ ■            ■   ■■■ ■ ■  ■■■ ■■■   ■ ■  ■     ■   \n",
+      "G|         ■■■ ■     ■■    ■              ■               ■■      ■            ■■    ■■    ■■        ■              ■ ■ ■        ■  ■ ■■ ■■   ■     ■■ ■            ■   ■■■ ■ ■  ■■■ ■■■   ■ ■  ■     ■   \n",
+      "T|                ■ ■   ■   ■■    ■ ■ ■    ■ ■■■■■     ■■                  ■■■■  ■ ■■  ■ ■■   ■  ■       ■ ■ ■  ■  ■   ■  ■ ■ ■■■           ■  ■■■■     ■■ ■   ■ ■   ■■         ■        ■  ■        ■  ■ \n",
+      "C| ■■   ■                 ■              ■            ■       ■■    ■   ■ ■       ■            ■■ ■           ■  ■           ■          ■  ■                ■   ■                       ■     ■  ■  ■  ■  \n",
+      "T|                ■ ■   ■   ■■    ■ ■ ■    ■ ■■■■■     ■■                  ■■■■  ■ ■■  ■ ■■   ■  ■       ■ ■ ■  ■  ■   ■  ■ ■ ■■■           ■  ■■■■     ■■ ■   ■ ■   ■■         ■        ■  ■        ■  ■ \n",
+      "T|                ■ ■   ■   ■■    ■ ■ ■    ■ ■■■■■     ■■                  ■■■■  ■ ■■  ■ ■■   ■  ■       ■ ■ ■  ■  ■   ■  ■ ■ ■■■           ■  ■■■■     ■■ ■   ■ ■   ■■         ■        ■  ■        ■  ■ \n",
+      "G|         ■■■ ■     ■■    ■              ■               ■■      ■            ■■    ■■    ■■        ■              ■ ■ ■        ■  ■ ■■ ■■   ■     ■■ ■            ■   ■■■ ■ ■  ■■■ ■■■   ■ ■  ■     ■   \n",
+      "G|         ■■■ ■     ■■    ■              ■               ■■      ■            ■■    ■■    ■■        ■              ■ ■ ■        ■  ■ ■■ ■■   ■     ■■ ■            ■   ■■■ ■ ■  ■■■ ■■■   ■ ■  ■     ■   \n",
+      "T|                ■ ■   ■   ■■    ■ ■ ■    ■ ■■■■■     ■■                  ■■■■  ■ ■■  ■ ■■   ■  ■       ■ ■ ■  ■  ■   ■  ■ ■ ■■■           ■  ■■■■     ■■ ■   ■ ■   ■■         ■        ■  ■        ■  ■ \n",
+      "A|■  ■■■ ■■   ■ ■■ ■   ■ ■    ■■■■ ■ ■ ■■   ■     ■■■■   ■  ■■  ■■ ■ ■■■ ■              ■    ■     ■■ ■■■ ■ ■  ■  ■  ■   ■ ■      ■■ ■       ■     ■  ■   ■  ■■   ■■   ■   ■ ■ ■    ■     ■    ■  ■■     ■\n",
+      "T|                ■ ■   ■   ■■    ■ ■ ■    ■ ■■■■■     ■■                  ■■■■  ■ ■■  ■ ■■   ■  ■       ■ ■ ■  ■  ■   ■  ■ ■ ■■■           ■  ■■■■     ■■ ■   ■ ■   ■■         ■        ■  ■        ■  ■ \n",
+      "T|                ■ ■   ■   ■■    ■ ■ ■    ■ ■■■■■     ■■                  ■■■■  ■ ■■  ■ ■■   ■  ■       ■ ■ ■  ■  ■   ■  ■ ■ ■■■           ■  ■■■■     ■■ ■   ■ ■   ■■         ■        ■  ■        ■  ■ \n",
+      "G|         ■■■ ■     ■■    ■              ■               ■■      ■            ■■    ■■    ■■        ■              ■ ■ ■        ■  ■ ■■ ■■   ■     ■■ ■            ■   ■■■ ■ ■  ■■■ ■■■   ■ ■  ■     ■   \n",
+      "G|         ■■■ ■     ■■    ■              ■               ■■      ■            ■■    ■■    ■■        ■              ■ ■ ■        ■  ■ ■■ ■■   ■     ■■ ■            ■   ■■■ ■ ■  ■■■ ■■■   ■ ■  ■     ■   \n",
+      "A|■  ■■■ ■■   ■ ■■ ■   ■ ■    ■■■■ ■ ■ ■■   ■     ■■■■   ■  ■■  ■■ ■ ■■■ ■              ■    ■     ■■ ■■■ ■ ■  ■  ■  ■   ■ ■      ■■ ■       ■     ■  ■   ■  ■■   ■■   ■   ■ ■ ■    ■     ■    ■  ■■     ■\n",
+      "C| ■■   ■                 ■              ■            ■       ■■    ■   ■ ■       ■            ■■ ■           ■  ■           ■          ■  ■                ■   ■                       ■     ■  ■  ■  ■  \n",
+      "A|■  ■■■ ■■   ■ ■■ ■   ■ ■    ■■■■ ■ ■ ■■   ■     ■■■■   ■  ■■  ■■ ■ ■■■ ■              ■    ■     ■■ ■■■ ■ ■  ■  ■  ■   ■ ■      ■■ ■       ■     ■  ■   ■  ■■   ■■   ■   ■ ■ ■    ■     ■    ■  ■■     ■\n",
+      "A|■  ■■■ ■■   ■ ■■ ■   ■ ■    ■■■■ ■ ■ ■■   ■     ■■■■   ■  ■■  ■■ ■ ■■■ ■              ■    ■     ■■ ■■■ ■ ■  ■  ■  ■   ■ ■      ■■ ■       ■     ■  ■   ■  ■■   ■■   ■   ■ ■ ■    ■     ■    ■  ■■     ■\n",
+      "T|                ■ ■   ■   ■■    ■ ■ ■    ■ ■■■■■     ■■                  ■■■■  ■ ■■  ■ ■■   ■  ■       ■ ■ ■  ■  ■   ■  ■ ■ ■■■           ■  ■■■■     ■■ ■   ■ ■   ■■         ■        ■  ■        ■  ■ \n",
+      "T|                ■ ■   ■   ■■    ■ ■ ■    ■ ■■■■■     ■■                  ■■■■  ■ ■■  ■ ■■   ■  ■       ■ ■ ■  ■  ■   ■  ■ ■ ■■■           ■  ■■■■     ■■ ■   ■ ■   ■■         ■        ■  ■        ■  ■ \n",
+      "G|         ■■■ ■     ■■    ■              ■               ■■      ■            ■■    ■■    ■■        ■              ■ ■ ■        ■  ■ ■■ ■■   ■     ■■ ■            ■   ■■■ ■ ■  ■■■ ■■■   ■ ■  ■     ■   \n",
+      "T|                ■ ■   ■   ■■    ■ ■ ■    ■ ■■■■■     ■■                  ■■■■  ■ ■■  ■ ■■   ■  ■       ■ ■ ■  ■  ■   ■  ■ ■ ■■■           ■  ■■■■     ■■ ■   ■ ■   ■■         ■        ■  ■        ■  ■ \n",
+      "T|                ■ ■   ■   ■■    ■ ■ ■    ■ ■■■■■     ■■                  ■■■■  ■ ■■  ■ ■■   ■  ■       ■ ■ ■  ■  ■   ■  ■ ■ ■■■           ■  ■■■■     ■■ ■   ■ ■   ■■         ■        ■  ■        ■  ■ \n",
+      "C| ■■   ■                 ■              ■            ■       ■■    ■   ■ ■       ■            ■■ ■           ■  ■           ■          ■  ■                ■   ■                       ■     ■  ■  ■  ■  \n",
+      "A|■  ■■■ ■■   ■ ■■ ■   ■ ■    ■■■■ ■ ■ ■■   ■     ■■■■   ■  ■■  ■■ ■ ■■■ ■              ■    ■     ■■ ■■■ ■ ■  ■  ■  ■   ■ ■      ■■ ■       ■     ■  ■   ■  ■■   ■■   ■   ■ ■ ■    ■     ■    ■  ■■     ■\n",
+      "A|■  ■■■ ■■   ■ ■■ ■   ■ ■    ■■■■ ■ ■ ■■   ■     ■■■■   ■  ■■  ■■ ■ ■■■ ■              ■    ■     ■■ ■■■ ■ ■  ■  ■  ■   ■ ■      ■■ ■       ■     ■  ■   ■  ■■   ■■   ■   ■ ■ ■    ■     ■    ■  ■■     ■\n",
+      "G|         ■■■ ■     ■■    ■              ■               ■■      ■            ■■    ■■    ■■        ■              ■ ■ ■        ■  ■ ■■ ■■   ■     ■■ ■            ■   ■■■ ■ ■  ■■■ ■■■   ■ ■  ■     ■   \n",
+      "G|         ■■■ ■     ■■    ■              ■               ■■      ■            ■■    ■■    ■■        ■              ■ ■ ■        ■  ■ ■■ ■■   ■     ■■ ■            ■   ■■■ ■ ■  ■■■ ■■■   ■ ■  ■     ■   \n",
+      "T|                ■ ■   ■   ■■    ■ ■ ■    ■ ■■■■■     ■■                  ■■■■  ■ ■■  ■ ■■   ■  ■       ■ ■ ■  ■  ■   ■  ■ ■ ■■■           ■  ■■■■     ■■ ■   ■ ■   ■■         ■        ■  ■        ■  ■ \n",
+      "T|                ■ ■   ■   ■■    ■ ■ ■    ■ ■■■■■     ■■                  ■■■■  ■ ■■  ■ ■■   ■  ■       ■ ■ ■  ■  ■   ■  ■ ■ ■■■           ■  ■■■■     ■■ ■   ■ ■   ■■         ■        ■  ■        ■  ■ \n",
+      "C| ■■   ■                 ■              ■            ■       ■■    ■   ■ ■       ■            ■■ ■           ■  ■           ■          ■  ■                ■   ■                       ■     ■  ■  ■  ■  \n",
+      "C| ■■   ■                 ■              ■            ■       ■■    ■   ■ ■       ■            ■■ ■           ■  ■           ■          ■  ■                ■   ■                       ■     ■  ■  ■  ■  \n",
+      "A|■  ■■■ ■■   ■ ■■ ■   ■ ■    ■■■■ ■ ■ ■■   ■     ■■■■   ■  ■■  ■■ ■ ■■■ ■              ■    ■     ■■ ■■■ ■ ■  ■  ■  ■   ■ ■      ■■ ■       ■     ■  ■   ■  ■■   ■■   ■   ■ ■ ■    ■     ■    ■  ■■     ■\n",
+      "A|■  ■■■ ■■   ■ ■■ ■   ■ ■    ■■■■ ■ ■ ■■   ■     ■■■■   ■  ■■  ■■ ■ ■■■ ■              ■    ■     ■■ ■■■ ■ ■  ■  ■  ■   ■ ■      ■■ ■       ■     ■  ■   ■  ■■   ■■   ■   ■ ■ ■    ■     ■    ■  ■■     ■\n",
+      "A|■  ■■■ ■■   ■ ■■ ■   ■ ■    ■■■■ ■ ■ ■■   ■     ■■■■   ■  ■■  ■■ ■ ■■■ ■              ■    ■     ■■ ■■■ ■ ■  ■  ■  ■   ■ ■      ■■ ■       ■     ■  ■   ■  ■■   ■■   ■   ■ ■ ■    ■     ■    ■  ■■     ■\n",
+      "A|■  ■■■ ■■   ■ ■■ ■   ■ ■    ■■■■ ■ ■ ■■   ■     ■■■■   ■  ■■  ■■ ■ ■■■ ■              ■    ■     ■■ ■■■ ■ ■  ■  ■  ■   ■ ■      ■■ ■       ■     ■  ■   ■  ■■   ■■   ■   ■ ■ ■    ■     ■    ■  ■■     ■\n",
+      "T|                ■ ■   ■   ■■    ■ ■ ■    ■ ■■■■■     ■■                  ■■■■  ■ ■■  ■ ■■   ■  ■       ■ ■ ■  ■  ■   ■  ■ ■ ■■■           ■  ■■■■     ■■ ■   ■ ■   ■■         ■        ■  ■        ■  ■ \n",
+      "G|         ■■■ ■     ■■    ■              ■               ■■      ■            ■■    ■■    ■■        ■              ■ ■ ■        ■  ■ ■■ ■■   ■     ■■ ■            ■   ■■■ ■ ■  ■■■ ■■■   ■ ■  ■     ■   \n",
+      "A|■  ■■■ ■■   ■ ■■ ■   ■ ■    ■■■■ ■ ■ ■■   ■     ■■■■   ■  ■■  ■■ ■ ■■■ ■              ■    ■     ■■ ■■■ ■ ■  ■  ■  ■   ■ ■      ■■ ■       ■     ■  ■   ■  ■■   ■■   ■   ■ ■ ■    ■     ■    ■  ■■     ■\n",
+      "G|         ■■■ ■     ■■    ■              ■               ■■      ■            ■■    ■■    ■■        ■              ■ ■ ■        ■  ■ ■■ ■■   ■     ■■ ■            ■   ■■■ ■ ■  ■■■ ■■■   ■ ■  ■     ■   \n",
+      "T|                ■ ■   ■   ■■    ■ ■ ■    ■ ■■■■■     ■■                  ■■■■  ■ ■■  ■ ■■   ■  ■       ■ ■ ■  ■  ■   ■  ■ ■ ■■■           ■  ■■■■     ■■ ■   ■ ■   ■■         ■        ■  ■        ■  ■ \n",
+      "G|         ■■■ ■     ■■    ■              ■               ■■      ■            ■■    ■■    ■■        ■              ■ ■ ■        ■  ■ ■■ ■■   ■     ■■ ■            ■   ■■■ ■ ■  ■■■ ■■■   ■ ■  ■     ■   \n",
+      "A|■  ■■■ ■■   ■ ■■ ■   ■ ■    ■■■■ ■ ■ ■■   ■     ■■■■   ■  ■■  ■■ ■ ■■■ ■              ■    ■     ■■ ■■■ ■ ■  ■  ■  ■   ■ ■      ■■ ■       ■     ■  ■   ■  ■■   ■■   ■   ■ ■ ■    ■     ■    ■  ■■     ■\n",
+      "T|                ■ ■   ■   ■■    ■ ■ ■    ■ ■■■■■     ■■                  ■■■■  ■ ■■  ■ ■■   ■  ■       ■ ■ ■  ■  ■   ■  ■ ■ ■■■           ■  ■■■■     ■■ ■   ■ ■   ■■         ■        ■  ■        ■  ■ \n",
+      "A|■  ■■■ ■■   ■ ■■ ■   ■ ■    ■■■■ ■ ■ ■■   ■     ■■■■   ■  ■■  ■■ ■ ■■■ ■              ■    ■     ■■ ■■■ ■ ■  ■  ■  ■   ■ ■      ■■ ■       ■     ■  ■   ■  ■■   ■■   ■   ■ ■ ■    ■     ■    ■  ■■     ■\n",
+      "T|                ■ ■   ■   ■■    ■ ■ ■    ■ ■■■■■     ■■                  ■■■■  ■ ■■  ■ ■■   ■  ■       ■ ■ ■  ■  ■   ■  ■ ■ ■■■           ■  ■■■■     ■■ ■   ■ ■   ■■         ■        ■  ■        ■  ■ \n",
+      "A|■  ■■■ ■■   ■ ■■ ■   ■ ■    ■■■■ ■ ■ ■■   ■     ■■■■   ■  ■■  ■■ ■ ■■■ ■              ■    ■     ■■ ■■■ ■ ■  ■  ■  ■   ■ ■      ■■ ■       ■     ■  ■   ■  ■■   ■■   ■   ■ ■ ■    ■     ■    ■  ■■     ■\n",
+      "T|                ■ ■   ■   ■■    ■ ■ ■    ■ ■■■■■     ■■                  ■■■■  ■ ■■  ■ ■■   ■  ■       ■ ■ ■  ■  ■   ■  ■ ■ ■■■           ■  ■■■■     ■■ ■   ■ ■   ■■         ■        ■  ■        ■  ■ \n",
+      "T|                ■ ■   ■   ■■    ■ ■ ■    ■ ■■■■■     ■■                  ■■■■  ■ ■■  ■ ■■   ■  ■       ■ ■ ■  ■  ■   ■  ■ ■ ■■■           ■  ■■■■     ■■ ■   ■ ■   ■■         ■        ■  ■        ■  ■ \n",
+      "T|                ■ ■   ■   ■■    ■ ■ ■    ■ ■■■■■     ■■                  ■■■■  ■ ■■  ■ ■■   ■  ■       ■ ■ ■  ■  ■   ■  ■ ■ ■■■           ■  ■■■■     ■■ ■   ■ ■   ■■         ■        ■  ■        ■  ■ \n",
+      "G|         ■■■ ■     ■■    ■              ■               ■■      ■            ■■    ■■    ■■        ■              ■ ■ ■        ■  ■ ■■ ■■   ■     ■■ ■            ■   ■■■ ■ ■  ■■■ ■■■   ■ ■  ■     ■   \n",
+      "A|■  ■■■ ■■   ■ ■■ ■   ■ ■    ■■■■ ■ ■ ■■   ■     ■■■■   ■  ■■  ■■ ■ ■■■ ■              ■    ■     ■■ ■■■ ■ ■  ■  ■  ■   ■ ■      ■■ ■       ■     ■  ■   ■  ■■   ■■   ■   ■ ■ ■    ■     ■    ■  ■■     ■\n",
+      "C| ■■   ■                 ■              ■            ■       ■■    ■   ■ ■       ■            ■■ ■           ■  ■           ■          ■  ■                ■   ■                       ■     ■  ■  ■  ■  \n",
+      "G|         ■■■ ■     ■■    ■              ■               ■■      ■            ■■    ■■    ■■        ■              ■ ■ ■        ■  ■ ■■ ■■   ■     ■■ ■            ■   ■■■ ■ ■  ■■■ ■■■   ■ ■  ■     ■   \n",
+      "A|■  ■■■ ■■   ■ ■■ ■   ■ ■    ■■■■ ■ ■ ■■   ■     ■■■■   ■  ■■  ■■ ■ ■■■ ■              ■    ■     ■■ ■■■ ■ ■  ■  ■  ■   ■ ■      ■■ ■       ■     ■  ■   ■  ■■   ■■   ■   ■ ■ ■    ■     ■    ■  ■■     ■\n",
+      "G|         ■■■ ■     ■■    ■              ■               ■■      ■            ■■    ■■    ■■        ■              ■ ■ ■        ■  ■ ■■ ■■   ■     ■■ ■            ■   ■■■ ■ ■  ■■■ ■■■   ■ ■  ■     ■   \n",
+      "G|         ■■■ ■     ■■    ■              ■               ■■      ■            ■■    ■■    ■■        ■              ■ ■ ■        ■  ■ ■■ ■■   ■     ■■ ■            ■   ■■■ ■ ■  ■■■ ■■■   ■ ■  ■     ■   \n",
+      "C| ■■   ■                 ■              ■            ■       ■■    ■   ■ ■       ■            ■■ ■           ■  ■           ■          ■  ■                ■   ■                       ■     ■  ■  ■  ■  \n",
+      "G|         ■■■ ■     ■■    ■              ■               ■■      ■            ■■    ■■    ■■        ■              ■ ■ ■        ■  ■ ■■ ■■   ■     ■■ ■            ■   ■■■ ■ ■  ■■■ ■■■   ■ ■  ■     ■   \n",
+      "G|         ■■■ ■     ■■    ■              ■               ■■      ■            ■■    ■■    ■■        ■              ■ ■ ■        ■  ■ ■■ ■■   ■     ■■ ■            ■   ■■■ ■ ■  ■■■ ■■■   ■ ■  ■     ■   \n",
+      "C| ■■   ■                 ■              ■            ■       ■■    ■   ■ ■       ■            ■■ ■           ■  ■           ■          ■  ■                ■   ■                       ■     ■  ■  ■  ■  \n",
+      "T|                ■ ■   ■   ■■    ■ ■ ■    ■ ■■■■■     ■■                  ■■■■  ■ ■■  ■ ■■   ■  ■       ■ ■ ■  ■  ■   ■  ■ ■ ■■■           ■  ■■■■     ■■ ■   ■ ■   ■■         ■        ■  ■        ■  ■ \n",
+      "A|■  ■■■ ■■   ■ ■■ ■   ■ ■    ■■■■ ■ ■ ■■   ■     ■■■■   ■  ■■  ■■ ■ ■■■ ■              ■    ■     ■■ ■■■ ■ ■  ■  ■  ■   ■ ■      ■■ ■       ■     ■  ■   ■  ■■   ■■   ■   ■ ■ ■    ■     ■    ■  ■■     ■\n",
+      "G|         ■■■ ■     ■■    ■              ■               ■■      ■            ■■    ■■    ■■        ■              ■ ■ ■        ■  ■ ■■ ■■   ■     ■■ ■            ■   ■■■ ■ ■  ■■■ ■■■   ■ ■  ■     ■   \n",
+      "T|                ■ ■   ■   ■■    ■ ■ ■    ■ ■■■■■     ■■                  ■■■■  ■ ■■  ■ ■■   ■  ■       ■ ■ ■  ■  ■   ■  ■ ■ ■■■           ■  ■■■■     ■■ ■   ■ ■   ■■         ■        ■  ■        ■  ■ \n",
+      "T|                ■ ■   ■   ■■    ■ ■ ■    ■ ■■■■■     ■■                  ■■■■  ■ ■■  ■ ■■   ■  ■       ■ ■ ■  ■  ■   ■  ■ ■ ■■■           ■  ■■■■     ■■ ■   ■ ■   ■■         ■        ■  ■        ■  ■ \n",
+      "T|                ■ ■   ■   ■■    ■ ■ ■    ■ ■■■■■     ■■                  ■■■■  ■ ■■  ■ ■■   ■  ■       ■ ■ ■  ■  ■   ■  ■ ■ ■■■           ■  ■■■■     ■■ ■   ■ ■   ■■         ■        ■  ■        ■  ■ \n",
+      "C| ■■   ■                 ■              ■            ■       ■■    ■   ■ ■       ■            ■■ ■           ■  ■           ■          ■  ■                ■   ■                       ■     ■  ■  ■  ■  \n",
+      "A|■  ■■■ ■■   ■ ■■ ■   ■ ■    ■■■■ ■ ■ ■■   ■     ■■■■   ■  ■■  ■■ ■ ■■■ ■              ■    ■     ■■ ■■■ ■ ■  ■  ■  ■   ■ ■      ■■ ■       ■     ■  ■   ■  ■■   ■■   ■   ■ ■ ■    ■     ■    ■  ■■     ■\n",
+      "G|         ■■■ ■     ■■    ■              ■               ■■      ■            ■■    ■■    ■■        ■              ■ ■ ■        ■  ■ ■■ ■■   ■     ■■ ■            ■   ■■■ ■ ■  ■■■ ■■■   ■ ■  ■     ■   \n",
+      "A|■  ■■■ ■■   ■ ■■ ■   ■ ■    ■■■■ ■ ■ ■■   ■     ■■■■   ■  ■■  ■■ ■ ■■■ ■              ■    ■     ■■ ■■■ ■ ■  ■  ■  ■   ■ ■      ■■ ■       ■     ■  ■   ■  ■■   ■■   ■   ■ ■ ■    ■     ■    ■  ■■     ■\n",
+      "A|■  ■■■ ■■   ■ ■■ ■   ■ ■    ■■■■ ■ ■ ■■   ■     ■■■■   ■  ■■  ■■ ■ ■■■ ■              ■    ■     ■■ ■■■ ■ ■  ■  ■  ■   ■ ■      ■■ ■       ■     ■  ■   ■  ■■   ■■   ■   ■ ■ ■    ■     ■    ■  ■■     ■\n",
+      "G|         ■■■ ■     ■■    ■              ■               ■■      ■            ■■    ■■    ■■        ■              ■ ■ ■        ■  ■ ■■ ■■   ■     ■■ ■            ■   ■■■ ■ ■  ■■■ ■■■   ■ ■  ■     ■   \n",
+      "C| ■■   ■                 ■              ■            ■       ■■    ■   ■ ■       ■            ■■ ■           ■  ■           ■          ■  ■                ■   ■                       ■     ■  ■  ■  ■  \n",
+      "T|                ■ ■   ■   ■■    ■ ■ ■    ■ ■■■■■     ■■                  ■■■■  ■ ■■  ■ ■■   ■  ■       ■ ■ ■  ■  ■   ■  ■ ■ ■■■           ■  ■■■■     ■■ ■   ■ ■   ■■         ■        ■  ■        ■  ■ \n",
+      "A|■  ■■■ ■■   ■ ■■ ■   ■ ■    ■■■■ ■ ■ ■■   ■     ■■■■   ■  ■■  ■■ ■ ■■■ ■              ■    ■     ■■ ■■■ ■ ■  ■  ■  ■   ■ ■      ■■ ■       ■     ■  ■   ■  ■■   ■■   ■   ■ ■ ■    ■     ■    ■  ■■     ■\n",
+      "T|                ■ ■   ■   ■■    ■ ■ ■    ■ ■■■■■     ■■                  ■■■■  ■ ■■  ■ ■■   ■  ■       ■ ■ ■  ■  ■   ■  ■ ■ ■■■           ■  ■■■■     ■■ ■   ■ ■   ■■         ■        ■  ■        ■  ■ \n",
+      "C| ■■   ■                 ■              ■            ■       ■■    ■   ■ ■       ■            ■■ ■           ■  ■           ■          ■  ■                ■   ■                       ■     ■  ■  ■  ■  \n",
+      "A|■  ■■■ ■■   ■ ■■ ■   ■ ■    ■■■■ ■ ■ ■■   ■     ■■■■   ■  ■■  ■■ ■ ■■■ ■              ■    ■     ■■ ■■■ ■ ■  ■  ■  ■   ■ ■      ■■ ■       ■     ■  ■   ■  ■■   ■■   ■   ■ ■ ■    ■     ■    ■  ■■     ■\n",
+      "A|■  ■■■ ■■   ■ ■■ ■   ■ ■    ■■■■ ■ ■ ■■   ■     ■■■■   ■  ■■  ■■ ■ ■■■ ■              ■    ■     ■■ ■■■ ■ ■  ■  ■  ■   ■ ■      ■■ ■       ■     ■  ■   ■  ■■   ■■   ■   ■ ■ ■    ■     ■    ■  ■■     ■\n",
+      "T|                ■ ■   ■   ■■    ■ ■ ■    ■ ■■■■■     ■■                  ■■■■  ■ ■■  ■ ■■   ■  ■       ■ ■ ■  ■  ■   ■  ■ ■ ■■■           ■  ■■■■     ■■ ■   ■ ■   ■■         ■        ■  ■        ■  ■ \n",
+      "C| ■■   ■                 ■              ■            ■       ■■    ■   ■ ■       ■            ■■ ■           ■  ■           ■          ■  ■                ■   ■                       ■     ■  ■  ■  ■  \n",
+      "G|         ■■■ ■     ■■    ■              ■               ■■      ■            ■■    ■■    ■■        ■              ■ ■ ■        ■  ■ ■■ ■■   ■     ■■ ■            ■   ■■■ ■ ■  ■■■ ■■■   ■ ■  ■     ■   \n",
+      "A|■  ■■■ ■■   ■ ■■ ■   ■ ■    ■■■■ ■ ■ ■■   ■     ■■■■   ■  ■■  ■■ ■ ■■■ ■              ■    ■     ■■ ■■■ ■ ■  ■  ■  ■   ■ ■      ■■ ■       ■     ■  ■   ■  ■■   ■■   ■   ■ ■ ■    ■     ■    ■  ■■     ■\n",
+      "A|■  ■■■ ■■   ■ ■■ ■   ■ ■    ■■■■ ■ ■ ■■   ■     ■■■■   ■  ■■  ■■ ■ ■■■ ■              ■    ■     ■■ ■■■ ■ ■  ■  ■  ■   ■ ■      ■■ ■       ■     ■  ■   ■  ■■   ■■   ■   ■ ■ ■    ■     ■    ■  ■■     ■\n",
+      "A|■  ■■■ ■■   ■ ■■ ■   ■ ■    ■■■■ ■ ■ ■■   ■     ■■■■   ■  ■■  ■■ ■ ■■■ ■              ■    ■     ■■ ■■■ ■ ■  ■  ■  ■   ■ ■      ■■ ■       ■     ■  ■   ■  ■■   ■■   ■   ■ ■ ■    ■     ■    ■  ■■     ■\n",
+      "C| ■■   ■                 ■              ■            ■       ■■    ■   ■ ■       ■            ■■ ■           ■  ■           ■          ■  ■                ■   ■                       ■     ■  ■  ■  ■  \n",
+      "T|                ■ ■   ■   ■■    ■ ■ ■    ■ ■■■■■     ■■                  ■■■■  ■ ■■  ■ ■■   ■  ■       ■ ■ ■  ■  ■   ■  ■ ■ ■■■           ■  ■■■■     ■■ ■   ■ ■   ■■         ■        ■  ■        ■  ■ \n",
+      "C| ■■   ■                 ■              ■            ■       ■■    ■   ■ ■       ■            ■■ ■           ■  ■           ■          ■  ■                ■   ■                       ■     ■  ■  ■  ■  \n",
+      "G|         ■■■ ■     ■■    ■              ■               ■■      ■            ■■    ■■    ■■        ■              ■ ■ ■        ■  ■ ■■ ■■   ■     ■■ ■            ■   ■■■ ■ ■  ■■■ ■■■   ■ ■  ■     ■   \n",
+      "G|         ■■■ ■     ■■    ■              ■               ■■      ■            ■■    ■■    ■■        ■              ■ ■ ■        ■  ■ ■■ ■■   ■     ■■ ■            ■   ■■■ ■ ■  ■■■ ■■■   ■ ■  ■     ■   \n",
+      "T|                ■ ■   ■   ■■    ■ ■ ■    ■ ■■■■■     ■■                  ■■■■  ■ ■■  ■ ■■   ■  ■       ■ ■ ■  ■  ■   ■  ■ ■ ■■■           ■  ■■■■     ■■ ■   ■ ■   ■■         ■        ■  ■        ■  ■ \n",
+      "C| ■■   ■                 ■              ■            ■       ■■    ■   ■ ■       ■            ■■ ■           ■  ■           ■          ■  ■                ■   ■                       ■     ■  ■  ■  ■  \n",
+      "G|         ■■■ ■     ■■    ■              ■               ■■      ■            ■■    ■■    ■■        ■              ■ ■ ■        ■  ■ ■■ ■■   ■     ■■ ■            ■   ■■■ ■ ■  ■■■ ■■■   ■ ■  ■     ■   \n",
+      "A|■  ■■■ ■■   ■ ■■ ■   ■ ■    ■■■■ ■ ■ ■■   ■     ■■■■   ■  ■■  ■■ ■ ■■■ ■              ■    ■     ■■ ■■■ ■ ■  ■  ■  ■   ■ ■      ■■ ■       ■     ■  ■   ■  ■■   ■■   ■   ■ ■ ■    ■     ■    ■  ■■     ■\n",
+      "G|         ■■■ ■     ■■    ■              ■               ■■      ■            ■■    ■■    ■■        ■              ■ ■ ■        ■  ■ ■■ ■■   ■     ■■ ■            ■   ■■■ ■ ■  ■■■ ■■■   ■ ■  ■     ■   \n",
+      "A|■  ■■■ ■■   ■ ■■ ■   ■ ■    ■■■■ ■ ■ ■■   ■     ■■■■   ■  ■■  ■■ ■ ■■■ ■              ■    ■     ■■ ■■■ ■ ■  ■  ■  ■   ■ ■      ■■ ■       ■     ■  ■   ■  ■■   ■■   ■   ■ ■ ■    ■     ■    ■  ■■     ■\n",
+      "T|                ■ ■   ■   ■■    ■ ■ ■    ■ ■■■■■     ■■                  ■■■■  ■ ■■  ■ ■■   ■  ■       ■ ■ ■  ■  ■   ■  ■ ■ ■■■           ■  ■■■■     ■■ ■   ■ ■   ■■         ■        ■  ■        ■  ■ \n",
+      "G|         ■■■ ■     ■■    ■              ■               ■■      ■            ■■    ■■    ■■        ■              ■ ■ ■        ■  ■ ■■ ■■   ■     ■■ ■            ■   ■■■ ■ ■  ■■■ ■■■   ■ ■  ■     ■   \n",
+      "G|         ■■■ ■     ■■    ■              ■               ■■      ■            ■■    ■■    ■■        ■              ■ ■ ■        ■  ■ ■■ ■■   ■     ■■ ■            ■   ■■■ ■ ■  ■■■ ■■■   ■ ■  ■     ■   \n",
+      "G|         ■■■ ■     ■■    ■              ■               ■■      ■            ■■    ■■    ■■        ■              ■ ■ ■        ■  ■ ■■ ■■   ■     ■■ ■            ■   ■■■ ■ ■  ■■■ ■■■   ■ ■  ■     ■   \n",
+      "C| ■■   ■                 ■              ■            ■       ■■    ■   ■ ■       ■            ■■ ■           ■  ■           ■          ■  ■                ■   ■                       ■     ■  ■  ■  ■  \n",
+      "G|         ■■■ ■     ■■    ■              ■               ■■      ■            ■■    ■■    ■■        ■              ■ ■ ■        ■  ■ ■■ ■■   ■     ■■ ■            ■   ■■■ ■ ■  ■■■ ■■■   ■ ■  ■     ■   \n",
+      "G|         ■■■ ■     ■■    ■              ■               ■■      ■            ■■    ■■    ■■        ■              ■ ■ ■        ■  ■ ■■ ■■   ■     ■■ ■            ■   ■■■ ■ ■  ■■■ ■■■   ■ ■  ■     ■   \n",
+      "G|         ■■■ ■     ■■    ■              ■               ■■      ■            ■■    ■■    ■■        ■              ■ ■ ■        ■  ■ ■■ ■■   ■     ■■ ■            ■   ■■■ ■ ■  ■■■ ■■■   ■ ■  ■     ■   \n",
+      "C| ■■   ■                 ■              ■            ■       ■■    ■   ■ ■       ■            ■■ ■           ■  ■           ■          ■  ■                ■   ■                       ■     ■  ■  ■  ■  \n",
+      "A|■  ■■■ ■■   ■ ■■ ■   ■ ■    ■■■■ ■ ■ ■■   ■     ■■■■   ■  ■■  ■■ ■ ■■■ ■              ■    ■     ■■ ■■■ ■ ■  ■  ■  ■   ■ ■      ■■ ■       ■     ■  ■   ■  ■■   ■■   ■   ■ ■ ■    ■     ■    ■  ■■     ■\n",
+      "A|■  ■■■ ■■   ■ ■■ ■   ■ ■    ■■■■ ■ ■ ■■   ■     ■■■■   ■  ■■  ■■ ■ ■■■ ■              ■    ■     ■■ ■■■ ■ ■  ■  ■  ■   ■ ■      ■■ ■       ■     ■  ■   ■  ■■   ■■   ■   ■ ■ ■    ■     ■    ■  ■■     ■\n",
+      "G|         ■■■ ■     ■■    ■              ■               ■■      ■            ■■    ■■    ■■        ■              ■ ■ ■        ■  ■ ■■ ■■   ■     ■■ ■            ■   ■■■ ■ ■  ■■■ ■■■   ■ ■  ■     ■   \n",
+      "T|                ■ ■   ■   ■■    ■ ■ ■    ■ ■■■■■     ■■                  ■■■■  ■ ■■  ■ ■■   ■  ■       ■ ■ ■  ■  ■   ■  ■ ■ ■■■           ■  ■■■■     ■■ ■   ■ ■   ■■         ■        ■  ■        ■  ■ \n",
+      "G|         ■■■ ■     ■■    ■              ■               ■■      ■            ■■    ■■    ■■        ■              ■ ■ ■        ■  ■ ■■ ■■   ■     ■■ ■            ■   ■■■ ■ ■  ■■■ ■■■   ■ ■  ■     ■   \n",
+      "C| ■■   ■                 ■              ■            ■       ■■    ■   ■ ■       ■            ■■ ■           ■  ■           ■          ■  ■                ■   ■                       ■     ■  ■  ■  ■  \n",
+      "G|         ■■■ ■     ■■    ■              ■               ■■      ■            ■■    ■■    ■■        ■              ■ ■ ■        ■  ■ ■■ ■■   ■     ■■ ■            ■   ■■■ ■ ■  ■■■ ■■■   ■ ■  ■     ■   \n",
+      "G|         ■■■ ■     ■■    ■              ■               ■■      ■            ■■    ■■    ■■        ■              ■ ■ ■        ■  ■ ■■ ■■   ■     ■■ ■            ■   ■■■ ■ ■  ■■■ ■■■   ■ ■  ■     ■   \n",
+      "C| ■■   ■                 ■              ■            ■       ■■    ■   ■ ■       ■            ■■ ■           ■  ■           ■          ■  ■                ■   ■                       ■     ■  ■  ■  ■  \n",
+      "A|■  ■■■ ■■   ■ ■■ ■   ■ ■    ■■■■ ■ ■ ■■   ■     ■■■■   ■  ■■  ■■ ■ ■■■ ■              ■    ■     ■■ ■■■ ■ ■  ■  ■  ■   ■ ■      ■■ ■       ■     ■  ■   ■  ■■   ■■   ■   ■ ■ ■    ■     ■    ■  ■■     ■\n",
+      "A|■  ■■■ ■■   ■ ■■ ■   ■ ■    ■■■■ ■ ■ ■■   ■     ■■■■   ■  ■■  ■■ ■ ■■■ ■              ■    ■     ■■ ■■■ ■ ■  ■  ■  ■   ■ ■      ■■ ■       ■     ■  ■   ■  ■■   ■■   ■   ■ ■ ■    ■     ■    ■  ■■     ■\n",
+      "C| ■■   ■                 ■              ■            ■       ■■    ■   ■ ■       ■            ■■ ■           ■  ■           ■          ■  ■                ■   ■                       ■     ■  ■  ■  ■  \n",
+      "A|■  ■■■ ■■   ■ ■■ ■   ■ ■    ■■■■ ■ ■ ■■   ■     ■■■■   ■  ■■  ■■ ■ ■■■ ■              ■    ■     ■■ ■■■ ■ ■  ■  ■  ■   ■ ■      ■■ ■       ■     ■  ■   ■  ■■   ■■   ■   ■ ■ ■    ■     ■    ■  ■■     ■\n",
+      "G|         ■■■ ■     ■■    ■              ■               ■■      ■            ■■    ■■    ■■        ■              ■ ■ ■        ■  ■ ■■ ■■   ■     ■■ ■            ■   ■■■ ■ ■  ■■■ ■■■   ■ ■  ■     ■   \n",
+      "C| ■■   ■                 ■              ■            ■       ■■    ■   ■ ■       ■            ■■ ■           ■  ■           ■          ■  ■                ■   ■                       ■     ■  ■  ■  ■  \n",
+      "T|                ■ ■   ■   ■■    ■ ■ ■    ■ ■■■■■     ■■                  ■■■■  ■ ■■  ■ ■■   ■  ■       ■ ■ ■  ■  ■   ■  ■ ■ ■■■           ■  ■■■■     ■■ ■   ■ ■   ■■         ■        ■  ■        ■  ■ \n",
+      "A|■  ■■■ ■■   ■ ■■ ■   ■ ■    ■■■■ ■ ■ ■■   ■     ■■■■   ■  ■■  ■■ ■ ■■■ ■              ■    ■     ■■ ■■■ ■ ■  ■  ■  ■   ■ ■      ■■ ■       ■     ■  ■   ■  ■■   ■■   ■   ■ ■ ■    ■     ■    ■  ■■     ■\n",
+      "None\n"
+     ]
+    }
+   ],
+   "source": [
+    "print(dotplot(hendra_seq[0:200],nipah_seq[0:200]))\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "232cab68",
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.9.12"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}
