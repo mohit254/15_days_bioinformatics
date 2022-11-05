@@ -2,7 +2,7 @@
  "cells": [
   {
    "cell_type": "markdown",
-   "id": "e65d075f",
+   "id": "175b514f",
    "metadata": {},
    "source": [
     "### k-mer\n",
@@ -10,16 +10,22 @@
     "for eg, k-mers for GTAGAG at different k-values are:\n",
     "\n",
     "k=1, G T A G A G\n",
+    "\n",
     "k=2, GT TA AG GA  AG\n",
+    "\n",
     "k=3, GTA TAG AGA GAG\n",
+    "\n",
     "k=4, GTAT TATA ATAG TAGA AGAG\n",
+    "\n",
     "k=5, GTAGA, TAGAG, AGAGC, GAGCT, AGCTG\n",
+    "\n",
+    "\n",
     "k=6, GTAGA"
    ]
   },
   {
    "cell_type": "markdown",
-   "id": "3534072c",
+   "id": "35378236",
    "metadata": {},
    "source": [
     "### Why we need 'k-mer'?\n",
@@ -31,7 +37,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "75a5f074",
+   "id": "76dd17c5",
    "metadata": {},
    "source": [
     "The k-mer features of a set of DNA/ Genomic sequences are of great significance on revealing the hidden patterns in that sequence population. Here, k is a integer constant and can range from 2 to several dozens, depending on the real application requirements. The k-mer features therefore are widely used in many applications of Bioinformatics, such as for building new prediction methods, etc."
@@ -39,7 +45,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "5246be21",
+   "id": "b1b91165",
    "metadata": {},
    "source": [
     "### Types of k-mer count\n",
@@ -56,36 +62,8 @@
    ]
   },
   {
-   "cell_type": "code",
-   "execution_count": 6,
-   "id": "428eaf46",
-   "metadata": {},
-   "outputs": [
-    {
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "--2022-11-05 13:26:57--  https://www.ncbi.nlm.nih.gov/nuccore/NC_001422.1?report=fasta\n",
-      "Resolving www.ncbi.nlm.nih.gov (www.ncbi.nlm.nih.gov)... 130.14.29.110, 2607:f220:41e:4290::110\n",
-      "Connecting to www.ncbi.nlm.nih.gov (www.ncbi.nlm.nih.gov)|130.14.29.110|:443... connected.\n",
-      "HTTP request sent, awaiting response... 200 OK\n",
-      "Length: unspecified [text/html]\n",
-      "Saving to: ‘NC_001422.1?report=fasta.1’\n",
-      "\n",
-      "NC_001422.1?report=     [         <=>        ]  68.63K  12.9KB/s    in 5.3s    \n",
-      "\n",
-      "2022-11-05 13:27:11 (12.9 KB/s) - ‘NC_001422.1?report=fasta.1’ saved [70278]\n",
-      "\n"
-     ]
-    }
-   ],
-   "source": [
-    "! wget https://www.ncbi.nlm.nih.gov/nuccore/NC_001422.1?report=fasta > sequence.fasta"
-   ]
-  },
-  {
    "cell_type": "markdown",
-   "id": "2e855a75",
+   "id": "8a3bc350",
    "metadata": {},
    "source": [
     "We will start with an easy example first: the phi-X174 genome has 5386 bp and is a simple non-repetitive genome. link:https://www.ncbi.nlm.nih.gov/nuccore/NC_001422.1?report=fasta"
@@ -93,27 +71,8 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 7,
-   "id": "013ab7c1",
-   "metadata": {},
-   "outputs": [
-    {
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      " kmer.ipynb\t\t    'NC_001422.1?report=fasta.1'\r\n",
-      "'NC_001422.1?report=fasta'   sequence.fasta\r\n"
-     ]
-    }
-   ],
-   "source": [
-    "!ls"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 18,
-   "id": "eea3ddfb",
+   "execution_count": 1,
+   "id": "e7191822",
    "metadata": {},
    "outputs": [],
    "source": [
@@ -125,8 +84,8 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 19,
-   "id": "19f35eea",
+   "execution_count": 2,
+   "id": "a8e53af5",
    "metadata": {
     "collapsed": true
    },
@@ -145,34 +104,8 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 16,
-   "id": "91bc20a9",
-   "metadata": {},
-   "outputs": [
-    {
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "ID: NC_001422.1\n",
-      "Name: NC_001422.1\n",
-      "Description: NC_001422.1 Escherichia phage phiX174, complete genome\n",
-      "Number of features: 0\n",
-      "Seq('GAGTTTTATCGCTTCCATGACGCAGAAGTTAACACTTTCGGATATTTCTGATGA...GCA')\n"
-     ]
-    }
-   ],
-   "source": [
-    "from Bio import SeqIO\n",
-    "\n",
-    "with open(\"seq.fasta\") as input_handle:\n",
-    "    for record in SeqIO.parse(input_handle, \"fasta\"):\n",
-    "        print(record)"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 4,
-   "id": "b6d23a61",
+   "execution_count": 3,
+   "id": "490ed441",
    "metadata": {},
    "outputs": [],
    "source": [
@@ -189,9 +122,11 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 23,
-   "id": "328f05c6",
-   "metadata": {},
+   "execution_count": 4,
+   "id": "831ba7c5",
+   "metadata": {
+    "collapsed": true
+   },
    "outputs": [
     {
      "data": {
@@ -1199,7 +1134,7 @@
        " ...]"
       ]
      },
-     "execution_count": 23,
+     "execution_count": 4,
      "metadata": {},
      "output_type": "execute_result"
     }
@@ -1210,7 +1145,7 @@
   },
   {
    "cell_type": "markdown",
-   "id": "81592fdf",
+   "id": "7dac6623",
    "metadata": {},
    "source": [
     "### This way we can extract k-mers from the sequences and perform different analysis based on those k-mers"
